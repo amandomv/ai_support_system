@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Create and activate virtual environment
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 
 # Upgrade pip
 pip install --upgrade pip
@@ -17,4 +17,4 @@ pre-commit install
 mkdir -p src
 
 echo "Setup complete! Don't forget to activate the virtual environment with:"
-echo "source venv/bin/activate"
+echo "source .venv/bin/activate"
