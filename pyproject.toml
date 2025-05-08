@@ -1,0 +1,69 @@
+[tool.ruff]
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "F", # pyflakes
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "I001", # isort
+    "PLE", # Pylint errors
+    "PLR0", # Pylint refactor (function metrics' subgroup)
+    "PLW", # Pylint warnings
+    "ANN", # flake8-annotations
+    "ARG", # flake8-unused-arguments
+    "C4", # flake8-comprehensions
+    "PIE", # flake8-pie
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "T10", # ban debugging functions
+    "T20", # ban prints
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501", # line too long
+    "W293", # don't highlight empty lines with spaces, let the formatter fix it
+    "RET504", # assign before return is ok
+    "C417", # allow `map` instead of comprehensions for clarity
+    "ANN101", # missing type-self
+    "ANN102", # missing type-cls
+    "ANN204", # return on constructor
+]
+
+# Pylint function metrics thresholds (PLR09xx)
+pylint.max-branches = 12 # default = 12
+pylint.max-args = 5 # default = 5
+pylint.max-statements = 50 # default = 50
+pylint.max-returns = 6 # default = 6
+
+# Pyupgrade
+pyupgrade.keep-runtime-typing = true
+
+[tool.ruff.lint.per-file-ignores]
+"src/**/*test.py" = ["ANN001","ANN201"] # ignore all unit tests
+
+[tool.pyright]
+include = ["src"]
+pythonVersion = "3.9"
+reportArgumentType = true
+reportAttributeAccessIssue = true
+reportMissingImports = true
+reportReturnType = true
+reportAbstractUsage = true
+reportAssignmentType = true
+reportCallIssue = true
+reportGeneralTypeIssues = true
+reportIncompatibleMethodOverride = true
+reportIncompatibleVariableOverride = true
+reportIndexIssue = true
+reportInvalidTypeForm = true
+reportOperatorIssue = true
+reportOptionalCall = true
+reportOptionalIterable = true
+reportOptionalMemberAccess = true
+reportOptionalOperand = true
+reportOptionalSubscript = true
+reportPossiblyUnboundVariable = true
+reportPrivateImportUsage = true
+reportRedeclaration = true
+reportUnusedCoroutine = true
