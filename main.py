@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
-from router import router
+
+from src.ai_response_router import router
 
 app = FastAPI(
     title="AI Support System API",
