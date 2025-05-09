@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS user_management;
 
 -- Create user table
 CREATE TABLE IF NOT EXISTS user_management.user (
-    id int4 GENERATED ALWAYS AS IDENTITY,
+    id SERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     user_name VARCHAR(100),
@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS user_management.user (
 
 -- Create index on email for faster lookups
 CREATE INDEX IF NOT EXISTS idx_user_email ON user_management.user(email);
-
 
 -- Add comment to table
 COMMENT ON TABLE user_management.user IS 'Stores user account information';

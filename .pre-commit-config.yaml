@@ -23,6 +23,6 @@ repos:
     hooks:
       - id: pyright
         name: Pyright type checking
-        entry: /opt/homebrew/bin/pyright
+        entry: pyright src/
         language: system
         types: [python]

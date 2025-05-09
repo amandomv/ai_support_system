@@ -23,7 +23,6 @@ wheels/
 # Ruff
 .ruff_cache/
 .ruff_cache
-.ruff_cache/
 
 # Virtual Environment
 .env

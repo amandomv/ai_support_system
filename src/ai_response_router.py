@@ -8,6 +8,6 @@ router = APIRouter(
 
 
 @router.get("/hello")
-async def hello_world() -> dict:
+async def hello_world() -> dict[str, str]:
     """Simple hello world endpoint."""
     return {"message": "Hola Mundo!"}
