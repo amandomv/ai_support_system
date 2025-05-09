@@ -1,0 +1,64 @@
+{
+  "faq_documents": [
+    {
+      "title": "What is Shakers?",
+      "link": "/faq/what-is-shakers",
+      "text_path": "base_data/faq_documents/01_what_is_shakers.md",
+      "category": "platform_overview"
+    },
+    {
+      "title": "How Do Payments Work on Shakers?",
+      "link": "/faq/payment-system",
+      "text_path": "base_data/faq_documents/02_payment_system.md",
+      "category": "payments"
+    },
+    {
+      "title": "How to Become a Freelancer on Shakers",
+      "link": "/faq/become-freelancer",
+      "text_path": "base_data/faq_documents/03_freelancer_guide.md",
+      "category": "freelancers"
+    },
+    {
+      "title": "How to Hire Freelancers on Shakers",
+      "link": "/faq/hire-freelancers",
+      "text_path": "base_data/faq_documents/04_client_guide.md",
+      "category": "clients"
+    },
+    {
+      "title": "Project Management on Shakers",
+      "link": "/faq/project-management",
+      "text_path": "base_data/faq_documents/05_project_management.md",
+      "category": "platform_features"
+    },
+    {
+      "title": "Dispute Resolution Process",
+      "link": "/faq/dispute-resolution",
+      "text_path": "base_data/faq_documents/06_dispute_resolution.md",
+      "category": "support"
+    },
+    {
+      "title": "Platform Fees and Pricing",
+      "link": "/faq/platform-fees",
+      "text_path": "base_data/faq_documents/07_platform_fees.md",
+      "category": "payments"
+    },
+    {
+      "title": "Platform Security and Privacy",
+      "link": "/faq/security-privacy",
+      "text_path": "base_data/faq_documents/08_security_measures.md",
+      "category": "platform_features"
+    },
+    {
+      "title": "Skill Verification and Certification",
+      "link": "/faq/skill-verification",
+      "text_path": "base_data/faq_documents/09_skill_verification.md",
+      "category": "freelancers"
+    },
+    {
+      "title": "Tips for Success on Shakers",
+      "link": "/faq/success-tips",
+      "text_path": "base_data/faq_documents/10_success_tips.md",
+      "category": "best_practices"
+    }
+  ]
+}
