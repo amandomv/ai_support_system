@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from asyncpg import Connection, Pool, create_pool
 
-from src.database.config.settings import get_settings
+from src.config.settings import get_settings
 
 pool_singleton: dict[str, Pool] = {}
 DEFAULT_CONNECTION_NAME: str = "default_connection"
@@ -18,11 +18,11 @@ async def get_pool(connection_name: str = DEFAULT_CONNECTION_NAME) -> Pool:
     if pool is None:
         settings = get_settings()
         pool = await create_pool(
-            host=settings.db_host,
-            port=settings.db_port,
-            user=settings.db_user,
-            password=settings.db_password,
-            database=settings.db_name,
+            host=settings.POSTGRES_HOST,
+            port=settings.POSTGRES_PORT,
+            user=settings.POSTGRES_USER,
+            password=settings.POSTGRES_PASSWORD,
+            database=settings.POSTGRES_DB,
             min_size=5,
             max_size=20,
         )

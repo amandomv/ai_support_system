@@ -20,6 +20,11 @@ wheels/
 .installed.cfg
 *.egg
 
+# Ruff
+.ruff_cache/
+.ruff_cache
+.ruff_cache/
+
 # Virtual Environment
 .env
 .venv
