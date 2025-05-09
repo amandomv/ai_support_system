@@ -2,6 +2,8 @@
 
 A Python project with modern development tools and configurations.
 
+Hello world
+
 ## Features
 
 - Ruff for fast Python linting
