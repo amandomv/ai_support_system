@@ -94,33 +94,21 @@ class AISupportManager:
 
     @track_response_time
     async def generate_ai_support_response(
-        self, query: str, user_id: int
+        self, query: str, user_id: int, i_am_a_developer: bool = False
     ) -> SupportResponse:
         """
-        Generate a support response for a user query.
-
-        This method:
-        1. Generates embeddings for the query
-        2. Finds similar FAQ documents
-        3. Generates a response using the context
-        4. Saves the interaction in the database
-        5. Returns the response with used documents
+        Generate an AI support response for a user query.
 
         Args:
             query: The user's question or query
             user_id: The ID of the user making the query
+            i_am_a_developer: If True, include technical documents in the results
 
         Returns:
-            SupportResponse containing:
-                - response: The generated response
-                - docs_used: List of documents used to generate the response
+            SupportResponse containing the generated response and relevant documents
 
         Raises:
-            ValueError: If query is empty or invalid
-            EmbeddingError: If there's an error generating embeddings
-            DatabaseError: If there's an error accessing the database
-            GenerationError: If there's an error generating the response
-            Exception: For any other unexpected errors
+            Exception: If there's an error during response generation
         """
         try:
             self.logger.info(f"Processing query for user {user_id}: {query[:100]}...")
@@ -128,7 +116,7 @@ class AISupportManager:
             # Generate embeddings and find similar documents
             query_embeddings = await self._generate_embeddings(query)
             similar_docs = await self._find_similar_documents(
-                query_embeddings.embedding.vector
+                query_embeddings.embedding.vector, i_am_a_developer=i_am_a_developer
             )
 
             # Generate response
@@ -157,9 +145,13 @@ class AISupportManager:
         return await self.ai_generation_repository.generate_embeddings(query)
 
     @track_document_search_time
-    async def _find_similar_documents(self, vector: list[float]) -> list[FaqDocument]:
+    async def _find_similar_documents(
+        self, vector: list[float], i_am_a_developer: bool = False
+    ) -> list[FaqDocument]:
         """Find similar documents using the embedding vector."""
-        return await self.ai_support_repository.get_faq_documents_by_similarity(vector)
+        return await self.ai_support_repository.get_faq_documents_by_similarity(
+            vector, i_am_a_developer=i_am_a_developer
+        )
 
     async def get_personal_recommendation(
         self,

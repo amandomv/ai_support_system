@@ -145,8 +145,8 @@
       "category": "technical"
     },
     {
-      "title": "Error Handling and Logging",
-      "link": "/faq/technical/error-handling",
+      "title": "Testing",
+      "link": "/faq/technical/testing",
       "text_path": "documentation/testing.md",
       "category": "technical"
     },

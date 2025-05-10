@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from src.application.ai_support_manager import AISupportManager, SupportResponse
 from src.dependencies.fastapi_depends import get_ai_support_manager_dependency
 from src.types.recommendations import RecommendationResponse
-from src.types.requests import QueryRequest
+from src.types.support import QueryRequest
 
 router = APIRouter(
     prefix="/ai_system",
@@ -27,14 +27,16 @@ async def get_ai_faq_search(
     Process a user query and return an AI-generated response with relevant links.
 
     Args:
-        request: The query request containing the user's question and ID
+        request: The query request containing the user's question, ID, and developer status
         ai_support_manager: The AI support manager instance (injected by FastAPI)
 
     Returns:
         SupportResponse containing the generated response and relevant links
     """
     return await ai_support_manager.generate_ai_support_response(
-        query=request.query, user_id=request.user_id
+        query=request.query,
+        user_id=request.user_id,
+        i_am_a_developer=request.i_am_a_developer,
     )
 
 

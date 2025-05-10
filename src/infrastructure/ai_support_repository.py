@@ -42,15 +42,19 @@ class AISupportRepository(AISupportInterface):
         return embedding
 
     async def get_faq_documents_by_similarity(
-        self, embeddings: list[float], max_documents: int = 5
+        self,
+        embeddings: list[float],
+        max_documents: int = 5,
+        i_am_a_developer: bool = False,
     ) -> list[FaqDocument]:
         query = """
         SELECT * FROM platform_information.faq_documents
-        ORDER BY embedding <> $1
+        WHERE ($3 = true OR category != 'technical')
+        ORDER BY embedding <=> $1::vector
         LIMIT $2
         """
         faq_similar_documents = await self.connection.fetch(
-            query, self._format_embeddings(embeddings), max_documents
+            query, self._format_embeddings(embeddings), max_documents, i_am_a_developer
         )
 
         return [self._convert_to_faq_document(doc) for doc in faq_similar_documents]

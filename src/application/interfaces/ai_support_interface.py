@@ -37,7 +37,10 @@ class AISupportInterface(ABC):
 
     @abstractmethod
     async def get_faq_documents_by_similarity(
-        self, embeddings: list[float], max_documents: int = 5
+        self,
+        embeddings: list[float],
+        max_documents: int = 5,
+        i_am_a_developer: bool = False,
     ) -> list[FaqDocument]:
         """
         Retrieve FAQ documents that are semantically similar to the provided embeddings.
@@ -45,6 +48,7 @@ class AISupportInterface(ABC):
         Args:
             embeddings: List of float values representing the query embedding
             max_documents: Maximum number of documents to return (default: 5)
+            i_am_a_developer: If True, include technical documents in the results
 
         Returns:
             List of FaqDocument objects ordered by similarity to the query
