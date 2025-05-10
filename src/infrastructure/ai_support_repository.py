@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Any
 
 from asyncpg import Connection
 
@@ -15,6 +16,30 @@ class AISupportRepository(AISupportInterface):
         self.connection = connection
         self.logger = logging.getLogger(__name__)
 
+    @staticmethod
+    def _format_embeddings(embeddings: list[float]) -> str:
+        """Format embeddings list as a PostgreSQL array string."""
+        return f"[{', '.join(map(str, embeddings))}]"
+
+    @staticmethod
+    def _convert_to_faq_document(doc: dict[str, Any]) -> FaqDocument:
+        """Convert a database record to a FaqDocument instance."""
+        doc_dict = dict(doc)
+        doc_dict["embedding"] = AISupportRepository._parse_embedding(
+            doc_dict["embedding"]
+        )
+        return FaqDocument(**doc_dict)
+
+    @staticmethod
+    def _parse_embedding(embedding: str | list[float]) -> list[float]:
+        """Parse embedding from database format to list of floats."""
+        if isinstance(embedding, str):
+            try:
+                return json.loads(embedding)
+            except json.JSONDecodeError:
+                return [float(x.strip()) for x in embedding.strip("[]").split(",")]
+        return embedding
+
     async def get_faq_documents_by_similarity(
         self, embeddings: list[float], max_documents: int = 5
     ) -> list[FaqDocument]:
@@ -24,26 +49,10 @@ class AISupportRepository(AISupportInterface):
         LIMIT $2
         """
         faq_similar_documents = await self.connection.fetch(
-            query, f"[{', '.join(map(str, embeddings))}]", max_documents
+            query, self._format_embeddings(embeddings), max_documents
         )
 
-        # Convert the documents and ensure embedding is a list
-        documents = []
-        for doc in faq_similar_documents:
-            doc_dict = dict(doc)
-            # Convert embedding string to list if it's a string
-            if isinstance(doc_dict["embedding"], str):
-                try:
-                    doc_dict["embedding"] = json.loads(doc_dict["embedding"])
-                except json.JSONDecodeError:
-                    # If it's not valid JSON, try to parse it as a comma-separated list
-                    doc_dict["embedding"] = [
-                        float(x.strip())
-                        for x in doc_dict["embedding"].strip("[]").split(",")
-                    ]
-            documents.append(FaqDocument(**doc_dict))
-
-        return documents
+        return [self._convert_to_faq_document(doc) for doc in faq_similar_documents]
 
     async def save_user_response(self, user_response: UserResponse) -> None:
         """
@@ -68,9 +77,9 @@ class AISupportRepository(AISupportInterface):
                 query,
                 user_response.user_id,
                 user_response.user_question,
-                f"[{', '.join(map(str, user_response.question_embedding))}]",
+                self._format_embeddings(user_response.question_embedding),
                 user_response.response,
-                f"[{', '.join(map(str, user_response.response_embedding))}]",
+                self._format_embeddings(user_response.response_embedding),
             )
             self.logger.debug(f"Saved user response for user {user_response.user_id}")
         except Exception as e:

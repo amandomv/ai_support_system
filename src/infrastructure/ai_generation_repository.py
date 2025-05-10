@@ -48,21 +48,14 @@ class AIGenerationRepository(AIGenerationInterface):
             self.logger.error(f"Error generating embedding: {str(e)}")
             raise
 
-    async def generate_response(
-        self, query: str, context_docs: list[FaqDocument]
-    ) -> tuple[str, list[FaqDocument]]:
-        try:
-            # Prepare the context from the documents
-            context = "\n\n".join(
-                f"Document: {doc.title}\nContent: {doc.text}" for doc in context_docs
-            )
-
-            # Create the prompt template
-            prompt = ChatPromptTemplate.from_messages(
-                [
-                    (
-                        "system",
-                        """You are a technical support assistant for the Shakers platform.
+    @staticmethod
+    def _create_prompt_template() -> ChatPromptTemplate:
+        """Create the prompt template for the chat."""
+        return ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    """You are a technical support assistant for the Shakers platform.
                 Your task is to answer user questions using ONLY the provided context.
                 If the answer is not in the context, say you don't have that information.
 
@@ -73,16 +66,42 @@ class AIGenerationRepository(AIGenerationInterface):
                 - Do not mention that you are an AI or that you are using context
 
                 {format_instructions}""",
-                    ),
-                    (
-                        "human",
-                        """Context:
+                ),
+                (
+                    "human",
+                    """Context:
                 {context}
 
                 User question: {query}""",
-                    ),
-                ]
-            )
+                ),
+            ]
+        )
+
+    @staticmethod
+    def _prepare_context(context_docs: list[FaqDocument]) -> str:
+        """Prepare the context string from the documents."""
+        return "\n\n".join(
+            f"Document: {doc.title}\nContent: {doc.text}" for doc in context_docs
+        )
+
+    @staticmethod
+    def _get_used_documents(
+        parsed_response: FormattedResponse, context_docs: list[FaqDocument]
+    ) -> list[FaqDocument]:
+        """Get the documents that were used in the response."""
+        return [
+            doc for doc in context_docs if doc.title in parsed_response.used_documents
+        ]
+
+    async def generate_response(
+        self, query: str, context_docs: list[FaqDocument]
+    ) -> tuple[str, list[FaqDocument]]:
+        try:
+            # Prepare the context from the documents
+            context = self._prepare_context(context_docs)
+
+            # Create the prompt template
+            prompt = self._create_prompt_template()
 
             # Initialize the output parser
             output_parser = PydanticOutputParser(pydantic_object=FormattedResponse)
@@ -109,10 +128,7 @@ class AIGenerationRepository(AIGenerationInterface):
             parsed_response = output_parser.parse(response.choices[0].message.content)  # pyright: ignore
 
             # Find which documents were used
-            used_docs = []
-            for doc in context_docs:
-                if doc.title in parsed_response.used_documents:
-                    used_docs.append(doc)
+            used_docs = self._get_used_documents(parsed_response, context_docs)
 
             return parsed_response.answer, used_docs
 
