@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 
+from src.types.documents import FaqDocument
 from src.types.embeddings import EmbeddingResponse
 
 
-class AIInterface(ABC):
+class AIGenerationInterface(ABC):
     """
     Interface for AI-related operations.
 
@@ -30,5 +31,27 @@ class AIInterface(ABC):
 
         Raises:
             Exception: If there's an error during the embedding generation process
+        """
+        ...
+
+    @abstractmethod
+    async def generate_response(
+        self, query: str, context_docs: list[FaqDocument]
+    ) -> tuple[str, list[FaqDocument]]:
+        """
+        Generate a response to a user query using the provided context documents.
+
+        Args:
+            query: The user's question or query
+            context_docs: List of FAQ documents to use as context
+
+        Returns:
+            Tuple containing:
+                - str: The generated response
+                - list[FaqDocument]: List of documents used in the response
+                    (empty list if no documents were relevant)
+
+        Raises:
+            Exception: If there's an error during the response generation process
         """
         ...

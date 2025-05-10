@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from src.application.dump_data_manager import DumpDataManager
-from src.infrastructure.ai_repository import get_ai_repository
+from src.infrastructure.ai_generation_repository import get_ai_generation_repository
 from src.infrastructure.dump_data_repository import get_dump_data_repository
 
 
@@ -26,7 +26,7 @@ async def init_base_data() -> None:
     try:
         # Initialize repositories
         async with get_dump_data_repository() as dump_data_repository:
-            ai_repository = await get_ai_repository()
+            ai_repository = await get_ai_generation_repository()
 
             # Load FAQ documents from JSON
             json_path = Path("base_data/faq_documents_list.json")

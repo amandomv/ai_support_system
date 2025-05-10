@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from src.application.interfaces.ai_interface import AIInterface
+from src.application.interfaces.ai_generation_interface import AIGenerationInterface
 from src.application.interfaces.dump_data_interface import DumpDataInterface
 from src.types.documents import FaqCategory, FaqDocument
 
@@ -15,7 +15,9 @@ class DumpDataManager:
     """
 
     def __init__(
-        self, dump_data_repository: DumpDataInterface, ai_repository: AIInterface
+        self,
+        dump_data_repository: DumpDataInterface,
+        ai_repository: AIGenerationInterface,
     ):
         """
         Initialize the manager with required repositories.
