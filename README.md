@@ -1,70 +1,158 @@
 # AI Support System
 
-A Python project with modern development tools and configurations.
-
-Hello world
+AI-based support system that uses embeddings and similarity search to provide accurate responses based on FAQ documents.
 
 ## Features
 
-- Ruff for fast Python linting
-- Pyright for static type checking
-- Pre-commit hooks for code quality
-- Black for code formatting
-- isort for import sorting
+- Embedding generation using OpenAI
+- Document similarity search using pgvector
+- REST API with FastAPI
+- Performance metrics with Prometheus
+- PostgreSQL database with pgvector
+- Automatic documentation with Swagger/ReDoc
 
-## Setup
+## Prerequisites
 
-1. Clone the repository:
+- Python 3.9+
+- Docker and Docker Compose
+- PostgreSQL 16+ with pgvector
+- Prometheus (for metrics)
+
+## Configuration
+
+### 1. Environment Variables
+
+Copy the `.env.example` file to `.env` and configure the variables:
+
 ```bash
-git clone <repository-url>
-cd ai_support_system
+cp .env.example .env
 ```
 
-2. Run the installation script:
+Edit `.env` with your settings:
+- `POSTGRES_*`: Database configuration
+- `OPENAI_API_KEY`: Your OpenAI API key
+- `INIT_BASE_DATA`: `true` to initialize sample data
+- `APP_PORT`: Application port (default: 8000)
+
+## Initialization Steps
+
+### Step 1: Start Database and Initial Data
+
+1. Start PostgreSQL with pgvector and initial data:
 ```bash
-chmod +x install.sh
-./install.sh
+docker-compose up db
 ```
 
-3. Activate the virtual environment:
+This step:
+- Starts PostgreSQL with pgvector
+- Runs `init_db.py` to create tables
+- Initializes base data if `INIT_BASE_DATA=true`
+
+The database will be available at:
+- Host: localhost
+- Port: 5432
+- User: postgres
+- Password: postgres
+- Database: ai_support_system
+
+### Step 2: Start the Application
+
+1. Create and activate a virtual environment:
 ```bash
-source venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
-## Development
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-The project uses several tools to maintain code quality:
+3. Start Prometheus (in a separate terminal):
+```bash
+prometheus --config.file=prometheus.yml
+```
 
-- **Ruff**: Fast Python linter
-- **Pyright**: Static type checker
-- **Pre-commit**: Git hooks for code quality
-- **Black**: Code formatter
-- **isort**: Import sorter
+4. Start the application:
+```bash
+python main.py
+```
 
-All these tools are configured to run automatically on commit. The configuration files are:
-
-- `pyproject.toml`: Contains configurations for Ruff, Pyright, Black, and isort
-- `.pre-commit-config.yaml`: Defines pre-commit hooks
+The application will be available at:
+- API: http://localhost:8000
+- Documentation: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+- Metrics: http://localhost:8000/metrics
+- Prometheus UI: http://localhost:9090
 
 ## Project Structure
 
 ```
-ai_support_system/
-├── src/               # Source code directory
-├── requirements.txt   # Python dependencies
-├── pyproject.toml    # Project configuration
-├── .pre-commit-config.yaml  # Pre-commit hooks
-└── install.sh        # Installation script
+.
+├── src/
+│   ├── application/          # Business logic
+│   ├── infrastructure/       # Technical implementations
+│   ├── config/              # Configuration
+│   ├── database/            # Models and migrations
+│   └── types/               # Types and models
+├── base_data/               # Sample data
+├── docker-compose.yml       # Docker configuration (database)
+├── Dockerfile              # Image configuration
+├── requirements.txt        # Dependencies
+└── prometheus.yml         # Prometheus configuration
 ```
 
-## Contributing
+## Metrics
 
-1. Make sure you have the pre-commit hooks installed:
+The system exposes metrics at `/metrics` including:
+
+- `ai_support_response_time_seconds`: Response time
+- `ai_support_responses_total`: Response counter
+- `ai_embedding_generation_time_seconds`: Embedding generation time
+- `ai_document_search_time_seconds`: Document search time
+
+Access metrics at:
+- Raw metrics: http://localhost:8000/metrics
+- Prometheus UI: http://localhost:9090
+
+## API Endpoints
+
+### POST /api/query
+Generates a support response based on a query.
+
+```json
+{
+  "query": "How can I reset my password?",
+  "user_id": 1
+}
+```
+
+Response:
+```json
+{
+  "response": "To reset your password...",
+  "docs_used": [
+    {
+      "title": "Password Reset",
+      "link": "https://example.com/reset-password"
+    }
+  ]
+}
+```
+
+## Development
+
+### Tests
 ```bash
-pre-commit install
+pytest
 ```
 
-2. Create a new branch for your changes
-3. Make your changes
-4. Commit your changes (pre-commit hooks will run automatically)
-5. Push your changes and create a pull request
+### Linting
+```bash
+ruff check .
+```
+
+### Formatting
+```bash
+ruff format .
+```

@@ -7,6 +7,7 @@ SCHEMAS_DIR = Path(__file__).parent / "db_schemas"
 SCHEMA_FILES = [
     "init_user.sql",
     "init_faq_documents.sql",
+    "init_user_response.sql",
     # Add more schema files here in the order they should be executed
 ]
 
