@@ -6,6 +6,10 @@ CREATE SCHEMA IF NOT EXISTS platform_information;
 
 -- Create category enum type
 CREATE TYPE platform_information.faq_category AS ENUM (
+    'general',
+    'technical',
+    'billing',
+    'account',
     'platform_overview',
     'payments',
     'freelancers',

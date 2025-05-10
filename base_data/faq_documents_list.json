@@ -89,6 +89,96 @@
       "link": "/faq/technical-tutorials",
       "text_path": "base_data/faq_documents/15_technical_tutorials.md",
       "category": "platform_features"
+    },
+    {
+      "title": "Event Manager System",
+      "link": "/faq/technical/event-manager",
+      "text_path": "documentation/next_steps.md",
+      "category": "technical"
+    },
+    {
+      "title": "Parallel Document Processing",
+      "link": "/faq/technical/parallel-processing",
+      "text_path": "documentation/next_steps.md",
+      "category": "technical"
+    },
+    {
+      "title": "AI Training Pipeline",
+      "link": "/faq/technical/ai-training",
+      "text_path": "documentation/next_steps.md",
+      "category": "technical"
+    },
+    {
+      "title": "Automated Embedding Generation",
+      "link": "/faq/technical/embeddings",
+      "text_path": "documentation/database_automation.md",
+      "category": "technical"
+    },
+    {
+      "title": "Performance Monitoring",
+      "link": "/faq/technical/monitoring",
+      "text_path": "documentation/metrics.md",
+      "category": "technical"
+    },
+    {
+      "title": "Database Connection Pooling",
+      "link": "/faq/technical/connection-pooling",
+      "text_path": "documentation/database_setup.md",
+      "category": "technical"
+    },
+    {
+      "title": "Event-Driven Architecture",
+      "link": "/faq/technical/event-driven",
+      "text_path": "documentation/architecture.md",
+      "category": "technical"
+    },
+    {
+      "title": "Vector Similarity Search",
+      "link": "/faq/technical/vector-search",
+      "text_path": "documentation/database_setup.md",
+      "category": "technical"
+    },
+    {
+      "title": "Caching Strategies",
+      "link": "/faq/technical/caching",
+      "text_path": "documentation/design_patterns.md",
+      "category": "technical"
+    },
+    {
+      "title": "Error Handling and Logging",
+      "link": "/faq/technical/error-handling",
+      "text_path": "documentation/testing.md",
+      "category": "technical"
+    },
+    {
+      "title": "General Guidelines",
+      "link": "/faq/general-guidelines",
+      "text_path": "base_data/faq_documents/16_general_guidelines.md",
+      "category": "general"
+    },
+    {
+      "title": "Billing and Payment Guide",
+      "link": "/faq/billing-guide",
+      "text_path": "base_data/faq_documents/17_billing_guide.md",
+      "category": "billing"
+    },
+    {
+      "title": "Account Management Guide",
+      "link": "/faq/account-management",
+      "text_path": "base_data/faq_documents/18_account_management.md",
+      "category": "account"
+    },
+    {
+      "title": "Support Resources",
+      "link": "/faq/support-resources",
+      "text_path": "base_data/faq_documents/19_support_resources.md",
+      "category": "support"
+    },
+    {
+      "title": "Best Practices Guide",
+      "link": "/faq/best-practices",
+      "text_path": "base_data/faq_documents/20_best_practices_guide.md",
+      "category": "best_practices"
     }
   ]
 }
