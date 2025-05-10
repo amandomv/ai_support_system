@@ -12,15 +12,9 @@ from src.infrastructure.prometheus_metrics import (
     track_embedding_time,
     track_response_time,
 )
-from src.types.documents import FaqDocument
+from src.types.documents import FaqDocument, FaqDocumentBaseData
 from src.types.embeddings import EmbeddingResponse
-
-
-class FaqDocumentBaseData(BaseModel):
-    """Base data model for FAQ documents used in responses."""
-
-    title: str
-    link: str
+from src.types.recommendations import Recommendation, RecommendationResponse
 
 
 class SupportResponse(BaseModel):
@@ -166,3 +160,38 @@ class AISupportManager:
     async def _find_similar_documents(self, vector: list[float]) -> list[FaqDocument]:
         """Find similar documents using the embedding vector."""
         return await self.ai_support_repository.get_faq_documents_by_similarity(vector)
+
+    async def get_personal_recommendation(
+        self,
+        user_id: int,
+    ) -> RecommendationResponse:
+        """
+        Get personalized recommendations based on user's query history.
+
+        Args:
+            user_id: The ID of the user to get recommendations for
+
+        Returns:
+            RecommendationResponse containing personalized recommendations with explanations
+        """
+        # Get user's query history
+        user_history = await self.ai_support_repository.get_user_query_history(user_id)
+
+        # Get recommendations from AI
+        recommendations_text = await self.ai_generation_repository.get_recommendations(
+            user_history=user_history, max_recommendations=5
+        )
+
+        # Parse recommendations into structured format
+        recommendations = []
+        for line in recommendations_text.strip().split("\n"):
+            if line.startswith("- "):
+                # Extract topic and explanation
+                parts = line[2:].split(": ", 1)
+                if len(parts) == 2:
+                    topic, explanation = parts
+                    recommendations.append(
+                        Recommendation(topic=topic, explanation=explanation)
+                    )
+
+        return RecommendationResponse(recommendations=recommendations)

@@ -7,6 +7,7 @@ from openai import OpenAI
 from pydantic import BaseModel, Field
 
 from src.application.interfaces.ai_generation_interface import AIGenerationInterface
+from src.application.interfaces.ai_support_interface import UserQueryHistory
 from src.config.settings import get_settings
 from src.types.documents import FaqDocument
 from src.types.embeddings import Embedding, EmbeddingResponse
@@ -134,6 +135,66 @@ class AIGenerationRepository(AIGenerationInterface):
 
         except Exception as e:
             self.logger.error(f"Error generating response: {str(e)}")
+            raise
+
+    async def get_recommendations(
+        self,
+        user_history: list[UserQueryHistory],
+        max_recommendations: int = 5,
+    ) -> str:
+        """
+        Generate personalized recommendations based on user's query history.
+
+        Args:
+            user_history: List of user's previous queries and responses
+            max_recommendations: Maximum number of recommendations to return
+
+        Returns:
+            str: Raw text containing recommendations in the format:
+                - [topic]: [explanation]
+                - [topic]: [explanation]
+                ...
+
+        Raises:
+            Exception: If there's an error generating recommendations
+        """
+        try:
+            # Create a prompt that focuses on user's interests based on history
+            history_text = "\n".join(
+                [
+                    f"- Question: {history.user_question}\n  Response: {history.response}"
+                    for history in user_history
+                ]
+            )
+            prompt = f"""Based on the user's previous interactions:
+{history_text}
+
+Generate {max_recommendations} personalized topic recommendations they might find interesting.
+For each recommendation, provide a topic and a brief explanation of why it might be relevant.
+
+Format each recommendation as:
+- [topic]: [explanation]
+
+Focus on patterns in their interests and suggest related topics they haven't explored yet."""
+
+            # Get recommendations from OpenAI
+            response = self.client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a helpful assistant that generates personalized topic recommendations.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.7,
+                max_tokens=500,
+            )
+
+            return response.choices[0].message.content or ""
+
+        except Exception as e:
+            self.logger.error(f"Error generating recommendations: {str(e)}")
             raise
 
 

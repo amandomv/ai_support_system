@@ -1,19 +1,15 @@
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
 
 from src.application.ai_support_manager import AISupportManager, SupportResponse
 from src.dependencies.fastapi_depends import get_ai_support_manager_dependency
+from src.types.recommendations import RecommendationResponse
+from src.types.requests import QueryRequest
 
 router = APIRouter(
     prefix="/ai_system",
     tags=["api"],
     responses={404: {"description": "Not found"}},
 )
-
-
-class QueryRequest(BaseModel):
-    query: str
-    user_id: int
 
 
 @router.get("/hello")
@@ -39,4 +35,24 @@ async def get_ai_faq_search(
     """
     return await ai_support_manager.generate_ai_support_response(
         query=request.query, user_id=request.user_id
+    )
+
+
+@router.get("/recommendations/{user_id}", response_model=RecommendationResponse)
+async def get_personal_recommendations(
+    user_id: int,
+    ai_support_manager: AISupportManager = Depends(get_ai_support_manager_dependency),
+) -> RecommendationResponse:
+    """
+    Get personalized recommendations based on user's query history.
+
+    Args:
+        user_id: The ID of the user to get recommendations for
+        ai_support_manager: AISupportManager instance for handling the request
+
+    Returns:
+        RecommendationResponse containing personalized recommendations with explanations
+    """
+    return await ai_support_manager.get_personal_recommendation(
+        user_id=user_id,
     )

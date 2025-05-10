@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from datetime import datetime
 
 from src.types.documents import FaqDocument
 
@@ -13,6 +14,16 @@ class UserResponse:
     question_embedding: list[float]
     response: str
     response_embedding: list[float]
+
+
+@dataclass
+class UserQueryHistory:
+    """Lightweight model for user query history."""
+
+    user_id: int
+    user_question: str
+    response: str
+    created_at: datetime
 
 
 class AISupportInterface(ABC):
@@ -61,4 +72,33 @@ class AISupportInterface(ABC):
             ValueError: If any of the required fields are invalid
             DatabaseError: If there's an error saving to the database
             Exception: For any other unexpected errors during save operation
+        """
+
+    @abstractmethod
+    async def get_user_query_history(self, user_id: int) -> list[UserQueryHistory]:
+        """
+        Retrieve the user's query history.
+
+        Args:
+            user_id: The ID of the user
+
+        Returns:
+            List of UserQueryHistory objects representing the user's query history,
+            ordered by most recent first
+
+        Raises:
+            ValueError: If user_id is invalid
+            DatabaseError: If there's an error accessing the database
+        """
+
+    @abstractmethod
+    async def get_faq_document(self, document_id: int) -> FaqDocument | None:
+        """
+        Get a FAQ document by its ID.
+
+        Args:
+            document_id: The ID of the FAQ document to retrieve
+
+        Returns:
+            FaqDocument if found, None otherwise
         """

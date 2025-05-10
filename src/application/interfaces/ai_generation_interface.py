@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from src.application.interfaces.ai_support_interface import UserQueryHistory
 from src.types.documents import FaqDocument
 from src.types.embeddings import EmbeddingResponse
 
@@ -53,5 +54,29 @@ class AIGenerationInterface(ABC):
 
         Raises:
             Exception: If there's an error during the response generation process
+        """
+        ...
+
+    @abstractmethod
+    async def get_recommendations(
+        self,
+        user_history: list[UserQueryHistory],
+        max_recommendations: int = 5,
+    ) -> str:
+        """
+        Generate personalized recommendations based on user's query history.
+
+        Args:
+            user_history: List of user's previous queries and responses
+            max_recommendations: Maximum number of recommendations to return
+
+        Returns:
+            str: Raw text containing recommendations in the format:
+                - [document_id]: [explanation]
+                - [document_id]: [explanation]
+                ...
+
+        Raises:
+            Exception: If there's an error generating recommendations
         """
         ...

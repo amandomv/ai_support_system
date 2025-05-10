@@ -6,6 +6,7 @@ from asyncpg import Connection
 
 from src.application.interfaces.ai_support_interface import (
     AISupportInterface,
+    UserQueryHistory,
     UserResponse,
 )
 from src.types.documents import FaqDocument
@@ -84,4 +85,69 @@ class AISupportRepository(AISupportInterface):
             self.logger.debug(f"Saved user response for user {user_response.user_id}")
         except Exception as e:
             self.logger.error(f"Error saving user response: {str(e)}")
+            raise
+
+    async def get_user_query_history(self, user_id: int) -> list[UserQueryHistory]:
+        """Retrieve the user's query history."""
+        query = """
+        SELECT
+            user_id,
+            user_question,
+            response,
+            created_at
+        FROM user_management.user_response
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+        LIMIT 10
+        """
+        try:
+            history = await self.connection.fetch(query, user_id)
+            return [
+                UserQueryHistory(
+                    user_id=record["user_id"],
+                    user_question=record["user_question"],
+                    response=record["response"],
+                    created_at=record["created_at"],
+                )
+                for record in history
+            ]
+        except Exception as e:
+            self.logger.error(f"Error retrieving user query history: {str(e)}")
+            raise
+
+    async def get_faq_document(self, document_id: int) -> FaqDocument | None:
+        """
+        Get a FAQ document by its ID.
+
+        Args:
+            document_id: The ID of the FAQ document to retrieve
+
+        Returns:
+            FaqDocument if found, None otherwise
+        """
+        try:
+            # Get the document from the database
+            row = await self.connection.fetchrow(
+                """
+                SELECT id, title, text, link, category, embedding
+                FROM platform_information.faq_documents
+                WHERE id = $1
+                """,
+                document_id,
+            )
+
+            if not row:
+                return None
+
+            return FaqDocument(
+                id=row["id"],
+                title=row["title"],
+                text=row["text"],
+                link=row["link"],
+                category=row["category"],
+                embedding=row["embedding"],
+            )
+
+        except Exception as e:
+            self.logger.error(f"Error retrieving FAQ document: {str(e)}")
             raise

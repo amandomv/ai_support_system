@@ -16,6 +16,13 @@ class FaqCategory(str, Enum):
     BEST_PRACTICES = "best_practices"
 
 
+class FaqDocumentBaseData(BaseModel):
+    """Base data model for FAQ documents used in responses."""
+
+    title: str
+    link: str
+
+
 class FaqDocument(BaseModel):
     """
     Model for FAQ documents stored in the database.
