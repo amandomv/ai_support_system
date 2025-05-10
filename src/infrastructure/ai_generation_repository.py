@@ -16,7 +16,9 @@ from src.types.embeddings import Embedding, EmbeddingResponse
 class FormattedResponse(BaseModel):
     """Model for the formatted response."""
 
-    answer: str = Field(description="The main answer to the user's question")
+    answer: str = Field(
+        description="The main answer to the user's question. Should be detailed and well-structured, including examples, explanations, and best practices."
+    )
     used_documents: list[str] = Field(
         description="List of document titles used to generate the answer"
     )
@@ -26,7 +28,7 @@ class AIGenerationRepository(AIGenerationInterface):
     def __init__(self, client: OpenAI) -> None:
         self.logger = logging.getLogger(__name__)
         self.model = "text-embedding-3-small"
-        self.chat_model = "gpt-3.5-turbo"
+        self.chat_model = "gpt-4"
         self.client = client
 
     async def generate_embeddings(self, text: str) -> EmbeddingResponse:
@@ -60,15 +62,16 @@ class AIGenerationRepository(AIGenerationInterface):
                 Your task is to answer user questions using ONLY the provided context.
                 If the answer is not in the context, say you don't have that information.
 
-                Provide a detailed response that:
-                1. Starts with a clear, direct answer
-                2. Includes specific examples and use cases
-                3. Explains any technical terms
-                4. Lists exact steps for processes
-                5. Adds relevant tips or best practices
-                6. Uses bullet points and code blocks when needed
+                Provide detailed responses that:
+                1. Start with a clear, direct answer
+                2. Include specific examples and use cases
+                3. Explain technical terms and concepts
+                4. Add relevant tips and best practices
+                5. Use bullet points for lists and steps
+                6. Use code blocks for technical content
 
                 Keep the tone professional but friendly. Do not mention you are an AI.
+                Be thorough and detailed in your explanations.
 
                 {format_instructions}""",
                 ),
@@ -125,8 +128,8 @@ class AIGenerationRepository(AIGenerationInterface):
                     {"role": "system", "content": formatted_prompt[0].content},
                     {"role": "user", "content": formatted_prompt[1].content},
                 ],
-                temperature=0.7,
-                max_tokens=500,
+                temperature=0.8,
+                max_tokens=2000,
             )
 
             # Parse the response

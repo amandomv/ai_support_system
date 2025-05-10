@@ -91,19 +91,19 @@
       "category": "platform_features"
     },
     {
-      "title": "Event Manager System",
+      "title": "Event Manager System NEXT STEPS",
       "link": "/faq/technical/event-manager",
       "text_path": "documentation/next_steps.md",
       "category": "technical"
     },
     {
-      "title": "Parallel Document Processing",
+      "title": "Parallel Document Processing NEXT STEPS",
       "link": "/faq/technical/parallel-processing",
       "text_path": "documentation/next_steps.md",
       "category": "technical"
     },
     {
-      "title": "AI Training Pipeline",
+      "title": "AI Training Pipeline NEXT STEPS",
       "link": "/faq/technical/ai-training",
       "text_path": "documentation/next_steps.md",
       "category": "technical"
