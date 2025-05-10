@@ -179,6 +179,42 @@
       "link": "/faq/best-practices",
       "text_path": "base_data/faq_documents/20_best_practices_guide.md",
       "category": "best_practices"
+    },
+    {
+      "title": "Prompt Management and Monitoring",
+      "link": "/faq/technical/prompt-management",
+      "text_path": "documentation/prompt_management.md",
+      "category": "technical"
+    },
+    {
+      "title": "Database Evolution Roadmap",
+      "link": "/faq/technical/database-evolution",
+      "text_path": "documentation/roadmap/database_evolution.md",
+      "category": "technical"
+    },
+    {
+      "title": "Performance Optimization Strategy",
+      "link": "/faq/technical/performance-optimization",
+      "text_path": "documentation/roadmap/performance_optimization.md",
+      "category": "technical"
+    },
+    {
+      "title": "Security Enhancements Plan",
+      "link": "/faq/technical/security-enhancements",
+      "text_path": "documentation/roadmap/security_enhancements.md",
+      "category": "technical"
+    },
+    {
+      "title": "Architecture Evolution Guide",
+      "link": "/faq/technical/architecture-evolution",
+      "text_path": "documentation/roadmap/architecture_evolution.md",
+      "category": "technical"
+    },
+    {
+      "title": "Machine Learning Pipeline Development",
+      "link": "/faq/technical/ml-pipeline",
+      "text_path": "documentation/roadmap/ml_pipeline.md",
+      "category": "technical"
     }
   ]
 }
