@@ -10,12 +10,12 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=ai_support_system
+      - INIT_BASE_DATA=${INIT_BASE_DATA:-false}
     volumes:
       - .:/app
     command: >
       bash -c "
-        ./install.sh &&
-        python init_db.py
+        ./install.sh
       "
 
   db:

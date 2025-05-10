@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = Field(description="PostgreSQL user")
     POSTGRES_PASSWORD: str = Field(description="PostgreSQL password")
     POSTGRES_DB: str = Field(description="PostgreSQL database name")
+    INIT_BASE_DATA: bool = Field(default=False, description="Initialize base data")
 
     # OpenAI settings
     OPENAI_API_KEY: str = Field(description="OpenAI API key")
@@ -27,6 +28,9 @@ class Settings(BaseSettings):
     # Optional settings with defaults
     DEBUG: bool = Field(default=False, description="Debug mode")
     LOG_LEVEL: str = Field(default="INFO", description="Logging level")
+
+    # APP PORT
+    APP_PORT: int = Field(description="Application port")
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", case_sensitive=True, extra="forbid"

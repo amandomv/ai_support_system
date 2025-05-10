@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from src.ai_response_router import router
+from src.config.settings import get_settings
 
 app = FastAPI(
     title="AI Support System API",
@@ -15,4 +16,4 @@ app = FastAPI(
 app.include_router(router)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8001)
+    uvicorn.run(app, host="localhost", port=get_settings().APP_PORT)
