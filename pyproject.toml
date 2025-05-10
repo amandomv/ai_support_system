@@ -67,6 +67,7 @@ pythonPlatform = "Linux"
 typeCheckingMode = "strict"
 include = ["src"]
 exclude = ["tests/helpers"]
+
 reportArgumentType = true
 reportAttributeAccessIssue = true
 reportMissingImports = true
