@@ -104,16 +104,16 @@ class AIGenerationRepository(AIGenerationInterface):
                 Your task is to answer user questions using ONLY the provided context.
                 If the answer is not in the context, say you don't have that information.
 
-                Provide detailed responses that:
-                1. Start with a clear, direct answer
-                2. Include specific examples and use cases
-                3. Explain technical terms and concepts
-                4. Add relevant tips and best practices
-                5. Use bullet points for lists and steps
-                6. Use code blocks for technical content
+                Provide concise responses that:
+                1. Start with a direct answer
+                2. Include only essential examples
+                3. Explain key terms briefly
+                4. Add critical tips only
+                5. Use bullet points for steps
+                6. Use code blocks when necessary
 
                 Keep the tone professional but friendly. Do not mention you are an AI.
-                Be thorough and detailed in your explanations.
+                Be clear and to the point.
 
                 {format_instructions}""",
                 ),
