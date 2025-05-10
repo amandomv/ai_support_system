@@ -1,8 +1,8 @@
-import uvicorn
 from fastapi import FastAPI
 
-from src.ai_response_router import router
+from src.ai_response_router import router as ai_router
 from src.config.settings import get_settings
+from src.infrastructure.prometheus_metrics import setup_prometheus_metrics
 
 app = FastAPI(
     title="AI Support System API",
@@ -12,8 +12,14 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# Include the router
-app.include_router(router)
+# Setup Prometheus metrics
+setup_prometheus_metrics(app)
+
+# Include routers
+app.include_router(ai_router, prefix="/api")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=get_settings().APP_PORT)
+    import uvicorn
+
+    port = get_settings().APP_PORT
+    uvicorn.run(app, host="0.0.0.0", port=port)

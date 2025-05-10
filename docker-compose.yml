@@ -11,6 +11,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=ai_support_system
       - INIT_BASE_DATA=${INIT_BASE_DATA:-false}
+      - ENABLE_METRICS=true
     volumes:
       - .:/app
     command: >
@@ -37,5 +38,21 @@ services:
     entrypoint: ["docker-entrypoint.sh"]
     command: postgres -c 'max_connections=1000'
 
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    depends_on:
+      - app
+
 volumes:
   postgres_data:
+  prometheus_data:

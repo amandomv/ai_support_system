@@ -5,7 +5,7 @@ from src.application.ai_support_manager import AISupportManager, SupportResponse
 from src.dependencies.fastapi_depends import get_ai_support_manager_dependency
 
 router = APIRouter(
-    prefix="/api",
+    prefix="/ai_system",
     tags=["api"],
     responses={404: {"description": "Not found"}},
 )

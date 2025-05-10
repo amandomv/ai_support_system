@@ -45,6 +45,3 @@ fi
 
 echo "Setup complete! Don't forget to activate the virtual environment with:"
 echo "source .venv/bin/activate"
-
-echo "Running app in port: $APP_PORT"
-python main.py

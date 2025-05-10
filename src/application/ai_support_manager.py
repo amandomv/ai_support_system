@@ -4,6 +4,13 @@ from pydantic import BaseModel
 
 from src.application.interfaces.ai_generation_interface import AIGenerationInterface
 from src.application.interfaces.ai_support_interface import AISupportInterface
+from src.infrastructure.prometheus_metrics import (
+    track_document_search_time,
+    track_embedding_time,
+    track_response_time,
+)
+from src.types.documents import FaqDocument
+from src.types.embeddings import EmbeddingResponse
 
 
 class FaqDocumentBaseData(BaseModel):
@@ -44,6 +51,7 @@ class AISupportManager:
         self.ai_generation_repository = ai_generation_repository
         self.ai_support_repository = ai_support_repository
 
+    @track_response_time
     async def generate_ai_support_response(
         self, query: str, user_id: int
     ) -> SupportResponse:
@@ -76,14 +84,12 @@ class AISupportManager:
             self.logger.info(f"Processing query for user {user_id}: {query[:100]}...")
 
             # Generate embeddings for the query
-            embeddings = await self.ai_generation_repository.generate_embeddings(query)
+            embeddings = await self._generate_embeddings(query)
             self.logger.debug(f"Generated embeddings with model: {embeddings.model}")
 
             # Find similar documents
-            similar_docs = (
-                await self.ai_support_repository.get_faq_documents_by_similarity(
-                    embeddings.embedding.vector
-                )
+            similar_docs = await self._find_similar_documents(
+                embeddings.embedding.vector
             )
             self.logger.debug(f"Found {len(similar_docs)} similar documents")
 
@@ -108,3 +114,13 @@ class AISupportManager:
         except Exception as e:
             self.logger.error(f"Error generating support response: {str(e)}")
             raise
+
+    @track_embedding_time
+    async def _generate_embeddings(self, query: str) -> EmbeddingResponse:
+        """Generate embeddings for the query."""
+        return await self.ai_generation_repository.generate_embeddings(query)
+
+    @track_document_search_time
+    async def _find_similar_documents(self, vector: list[float]) -> list[FaqDocument]:
+        """Find similar documents using the embedding vector."""
+        return await self.ai_support_repository.get_faq_documents_by_similarity(vector)
