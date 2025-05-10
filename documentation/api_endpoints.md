@@ -1,173 +1,262 @@
-# API Endpoints Documentation
+# API Endpoints Guide
 
 ## Overview
-The AI Support System provides two main endpoints for handling user queries and generating recommendations. Both endpoints use FastAPI's dependency injection system and follow RESTful principles.
+The AI Support System implements a comprehensive RESTful API using FastAPI. The API provides endpoints for AI-powered support responses, personalized recommendations, and system management. The implementation includes dependency injection, request validation, and comprehensive error handling.
 
-## Endpoints
+## Core Endpoints
 
-### 1. AI Support Response
-```python
-@router.post("/ai_faq_search", response_model=SupportResponse)
-async def get_ai_support_response(
-    request: QueryRequest,
-    ai_support_manager: AISupportManager = Depends(get_ai_support_manager_dependency)
-) -> SupportResponse:
-    """
-    Generate AI-powered support response based on user query.
-    
-    Args:
-        request: QueryRequest containing user query and ID
-        ai_support_manager: Injected AISupportManager instance
-    
-    Returns:
-        SupportResponse containing AI-generated response and relevant documents
-    """
-    return await ai_support_manager.get_ai_support_response(request.query, request.user_id)
-```
+### AI Support Response
+The AI support response endpoint is implemented in `routers/ai_support.py`:
 
-#### Request Model
-```python
-class QueryRequest(BaseModel):
-    query: str
-    user_id: int
-```
+1. **Endpoint Definition**: Core functionality:
+   - Path: `/ai_faq_search`
+   - Method: POST
+   - Purpose: Generate AI-powered support responses
+   - Input: User query and ID
+   - Output: AI response and relevant documents
+   - Rate Limit: 5 requests per minute
 
-#### Response Model
-```python
-class SupportResponse(BaseModel):
-    response: str
-    relevant_documents: List[FaqDocument]
-```
+2. **Request Processing**: Request handling:
+   - Input validation
+   - Query preprocessing
+   - Vector search
+   - Response generation
+   - Error handling
 
-### 2. Personal Recommendations
-```python
-@router.post("/recommendations", response_model=RecommendationResponse)
-async def get_personal_recommendations(
-    request: QueryRequest,
-    ai_support_manager: AISupportManager = Depends(get_ai_support_manager_dependency)
-) -> RecommendationResponse:
-    """
-    Generate personalized recommendations based on user history.
-    
-    Args:
-        request: QueryRequest containing user query and ID
-        ai_support_manager: Injected AISupportManager instance
-    
-    Returns:
-        RecommendationResponse containing personalized recommendations
-    """
-    return await ai_support_manager.get_personal_recommendation(request.user_id)
-```
+3. **Response Generation**: Response creation:
+   - AI model integration
+   - Context assembly
+   - Response formatting
+   - Confidence scoring
+   - Performance tracking
 
-#### Request Model
-```python
-class QueryRequest(BaseModel):
-    query: str
-    user_id: int
-```
+### Personal Recommendations
+The recommendations endpoint is implemented in `routers/recommendations.py`:
 
-#### Response Model
-```python
-class RecommendationResponse(BaseModel):
-    recommendations: List[Recommendation]
-```
+1. **Endpoint Definition**: Core functionality:
+   - Path: `/recommendations`
+   - Method: POST
+   - Purpose: Generate personalized recommendations
+   - Input: User ID
+   - Output: List of recommendations
+   - Authentication: JWT-based
+
+2. **Recommendation Process**: Processing flow:
+   - User history analysis
+   - Similarity calculation
+   - Content filtering
+   - Response formatting
+   - Performance optimization
+
+## Request/Response Models
+
+### Support Response
+The support response models are defined in `models/support.py`:
+
+1. **Request Model**: Input validation:
+   - Query text
+   - User identifier
+   - Context information
+   - Optional parameters
+   - Validation rules
+
+2. **Response Model**: Output structure:
+   - AI response text
+   - Relevant documents
+   - Confidence scores
+   - Processing metadata
+   - Error information
+
+### Recommendations
+The recommendation models are defined in `models/recommendations.py`:
+
+1. **Request Model**: Input validation:
+   - User identifier
+   - Filter parameters
+   - Context information
+   - Optional settings
+   - Validation rules
+
+2. **Response Model**: Output structure:
+   - Recommendation list
+   - Relevance scores
+   - Content metadata
+   - Processing information
+   - Error details
 
 ## Error Handling
 
-### 1. Validation Errors
-```python
-class ValidationError(BaseModel):
-    detail: str
-    status_code: int = 400
-```
+### Status Codes
+The system implements comprehensive error handling:
 
-### 2. Database Errors
-```python
-class DatabaseError(BaseModel):
-    detail: str
-    status_code: int = 500
-```
+1. **Client Errors**: User input issues:
+   - 400: Bad Request
+   - 401: Unauthorized
+   - 403: Forbidden
+   - 404: Not Found
+   - 429: Too Many Requests
 
-### 3. OpenAI API Errors
-```python
-class OpenAIError(BaseModel):
-    detail: str
-    status_code: int = 503
-```
+2. **Server Errors**: System issues:
+   - 500: Internal Server Error
+   - 502: Bad Gateway
+   - 503: Service Unavailable
+   - 504: Gateway Timeout
 
-## Response Codes
+### Error Definitions
+Error handling is implemented in `exceptions.py`:
 
-- `200 OK`: Successful request
-- `400 Bad Request`: Invalid input data
-- `404 Not Found`: Resource not found
-- `500 Internal Server Error`: Server-side error
-- `503 Service Unavailable`: External service unavailable
+1. **Validation Errors**: Input validation:
+   - Field validation
+   - Type checking
+   - Format verification
+   - Constraint checking
+   - Custom validation
 
-## Rate Limiting
-
-```python
-@router.post("/ai_faq_search")
-@limiter.limit("5/minute")
-async def get_ai_support_response():
-    # Implementation
-    pass
-```
+2. **Business Logic Errors**: Application errors:
+   - Resource not found
+   - Permission denied
+   - Rate limit exceeded
+   - Invalid operation
+   - State conflict
 
 ## Security
 
-### 1. API Key Authentication
-```python
-@router.post("/recommendations")
-async def get_personal_recommendations(
-    api_key: str = Header(..., alias="X-API-Key")
-):
-    # Implementation
-    pass
-```
+### API Key Validation
+API key validation is implemented in `middleware/auth.py`:
 
-### 2. Input Validation
-```python
-class QueryRequest(BaseModel):
-    query: str = Field(..., min_length=1, max_length=1000)
-    user_id: int = Field(..., gt=0)
-```
+1. **Key Management**: Security handling:
+   - Key validation
+   - Rate limiting
+   - Access control
+   - Usage tracking
+   - Key rotation
+
+2. **Access Control**: Permission management:
+   - Role-based access
+   - Resource permissions
+   - Operation restrictions
+   - Audit logging
+   - Security monitoring
+
+### Rate Limiting
+Rate limiting is implemented using Redis:
+
+1. **Limit Configuration**: Rate control:
+   - Request counting
+   - Time window management
+   - Limit enforcement
+   - Queue management
+   - Error handling
+
+2. **User Management**: User tracking:
+   - User identification
+   - Usage tracking
+   - Limit customization
+   - Exception handling
+   - Monitoring
 
 ## Monitoring
 
-### 1. Response Time
-```python
-@metrics.track_time(RESPONSE_TIME, {'endpoint': 'support'})
-async def get_ai_support_response():
-    # Implementation
-    pass
-```
+### Performance Metrics
+Performance monitoring is implemented in `monitoring/metrics.py`:
 
-### 2. Request Count
-```python
-@metrics.track_usage(REQUEST_COUNT, {'endpoint': 'support'})
-async def get_ai_support_response():
-    # Implementation
-    pass
-```
+1. **Response Time**: Performance tracking:
+   - Endpoint timing
+   - Processing duration
+   - Database queries
+   - External calls
+   - Overall latency
+
+2. **Resource Usage**: Resource monitoring:
+   - Memory usage
+   - CPU utilization
+   - Database connections
+   - Cache performance
+   - Network usage
+
+### Health Checks
+Health monitoring is implemented in `monitoring/health.py`:
+
+1. **Service Health**: Service monitoring:
+   - API availability
+   - Database connection
+   - Cache status
+   - External services
+   - Resource status
+
+2. **Performance Health**: Performance monitoring:
+   - Response times
+   - Error rates
+   - Resource usage
+   - Queue status
+   - System load
 
 ## Best Practices
 
-1. **Input Validation**
-   - Use Pydantic models
-   - Validate all inputs
-   - Sanitize user data
+### Input Handling
+Input processing guidelines:
 
-2. **Error Handling**
-   - Use appropriate status codes
-   - Provide meaningful error messages
-   - Log errors properly
+1. **Validation**: Input validation:
+   - Type checking
+   - Format verification
+   - Constraint validation
+   - Security checks
+   - Error handling
 
-3. **Performance**
-   - Use async/await
-   - Implement caching
-   - Monitor response times
+2. **Processing**: Input processing:
+   - Data cleaning
+   - Format conversion
+   - Context enrichment
+   - Security filtering
+   - Performance optimization
 
-4. **Security**
-   - Validate API keys
-   - Rate limit requests
-   - Sanitize inputs 
+### Error Management
+Error handling guidelines:
+
+1. **Error Handling**: Error management:
+   - Error detection
+   - Error classification
+   - Error reporting
+   - Recovery procedures
+   - User feedback
+
+2. **Logging**: Error logging:
+   - Error details
+   - Context information
+   - Stack traces
+   - User impact
+   - Resolution tracking
+
+### Performance Optimization
+Performance guidelines:
+
+1. **Response Time**: Performance optimization:
+   - Query optimization
+   - Cache utilization
+   - Resource management
+   - Load balancing
+   - Monitoring
+
+2. **Resource Usage**: Resource optimization:
+   - Memory management
+   - CPU utilization
+   - Database efficiency
+   - Cache strategy
+   - Network optimization
+
+### Security Measures
+Security implementation guidelines:
+
+1. **Authentication**: Security implementation:
+   - Token validation
+   - Session management
+   - Access control
+   - Audit logging
+   - Security monitoring
+
+2. **Data Protection**: Data security:
+   - Input sanitization
+   - Output encoding
+   - Data encryption
+   - Access control
+   - Security monitoring 

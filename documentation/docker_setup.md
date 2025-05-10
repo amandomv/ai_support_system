@@ -1,254 +1,229 @@
-# Docker Setup Documentation
+# Docker Setup Guide
 
 ## Overview
-The AI Support System is containerized using Docker and Docker Compose for easy deployment and scalability. The setup includes the main application, PostgreSQL database with pgvector, and Prometheus for monitoring.
+The AI Support System implements a containerized environment using Docker and Docker Compose. This setup ensures consistent deployment across different environments and provides isolated services for the main application, database, and monitoring components.
 
-## Dockerfile
+## Container Configuration
 
-### 1. Base Configuration
-```dockerfile
-# Base image
-FROM python:3.11-slim
+### Base Image
+The system uses a Python 3.11 slim base image with the following configuration:
 
-# Set working directory
-WORKDIR /app
+1. **System Dependencies**: Essential system packages:
+   - Build tools for Python packages
+   - SSL certificates for secure connections
+   - System utilities for monitoring
+   - Security updates
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+2. **Application Setup**: Python environment configuration:
+   - Virtual environment creation
+   - Dependency installation
+   - Application code deployment
+   - Configuration management
 
-# Copy requirements first for better caching
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+3. **Multi-stage Build**: Optimized build process:
+   - Build stage for dependencies
+   - Runtime stage for application
+   - Layer optimization
+   - Security hardening
 
-# Copy application code
-COPY . .
+## Service Configuration
 
-# Set environment variables
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
+### Main Application
+The FastAPI application service configuration:
 
-# Run migrations and start application
-CMD ["sh", "-c", "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000"]
-```
+1. **Port Mapping**: Network configuration:
+   - API port exposure
+   - Health check endpoint
+   - Internal service ports
+   - Security restrictions
 
-### 2. Multi-stage Build (Optional)
-```dockerfile
-# Build stage
-FROM python:3.11-slim as builder
+2. **Environment Variables**: Configuration management:
+   - Database connection details
+   - API keys and secrets
+   - Service configuration
+   - Feature flags
 
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+3. **Volume Mounts**: Persistent storage:
+   - Application logs
+   - Configuration files
+   - Temporary storage
+   - Cache directories
 
-# Final stage
-FROM python:3.11-slim
+### Database Service
+PostgreSQL service configuration:
 
-WORKDIR /app
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY . .
+1. **Data Persistence**: Storage management:
+   - Data volume configuration
+   - Backup storage
+   - Log persistence
+   - Temporary files
 
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
+2. **Performance Settings**: Database optimization:
+   - Memory allocation
+   - Connection limits
+   - Cache settings
+   - Query optimization
 
-CMD ["sh", "-c", "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000"]
-```
+3. **Health Monitoring**: Database health checks:
+   - Connection verification
+   - Query performance
+   - Resource usage
+   - Error tracking
 
-## Docker Compose
+### Monitoring Services
+Prometheus and Grafana configuration:
 
-### 1. Basic Setup
-```yaml
-version: '3.8'
+1. **Metrics Collection**: Performance monitoring:
+   - Application metrics
+   - System metrics
+   - Database metrics
+   - Custom metrics
 
-services:
-  app:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/ai_support
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    depends_on:
-      - db
-      - prometheus
+2. **Visualization**: Dashboard configuration:
+   - System overview
+   - Performance graphs
+   - Error tracking
+   - Resource usage
 
-  db:
-    image: ankane/pgvector:latest
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=ai_support
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+## Environment Setup
 
-  prometheus:
-    image: prom/prometheus:latest
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
+### Application Variables
+Environment configuration for the main application:
 
-volumes:
-  postgres_data:
-```
+1. **Connection Details**: Service connections:
+   - Database URL
+   - Redis connection
+   - External APIs
+   - Service endpoints
 
-### 2. Development Setup
-```yaml
-version: '3.8'
+2. **Performance Settings**: Application optimization:
+   - Worker configuration
+   - Cache settings
+   - Timeout values
+   - Resource limits
 
-services:
-  app:
-    build: 
-      context: .
-      dockerfile: Dockerfile.dev
-    ports:
-      - "8000:8000"
-    volumes:
-      - .:/app
-    environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/ai_support
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
-    depends_on:
-      - db
+### Database Variables
+PostgreSQL environment configuration:
 
-  db:
-    image: ankane/pgvector:latest
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=ai_support
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+1. **Authentication**: Security settings:
+   - User credentials
+   - Access control
+   - SSL configuration
+   - Network security
 
-volumes:
-  postgres_data:
-```
-
-## Environment Variables
-
-### 1. Application Variables
-```env
-# Database
-DATABASE_URL=postgresql://user:password@db:5432/ai_support
-
-# OpenAI
-OPENAI_API_KEY=your-api-key
-
-# Application
-PORT=8000
-HOST=0.0.0.0
-DEBUG=false
-```
-
-### 2. Database Variables
-```env
-# PostgreSQL
-POSTGRES_USER=user
-POSTGRES_PASSWORD=password
-POSTGRES_DB=ai_support
-POSTGRES_PORT=5432
-```
+2. **Performance**: Database optimization:
+   - Memory settings
+   - Connection pool
+   - Query cache
+   - Index settings
 
 ## Deployment
 
-### 1. Local Development
-```bash
-# Start services
-docker-compose up -d
+### Development
+Local development setup:
 
-# Run migrations
-docker-compose exec app alembic upgrade head
+1. **Local Startup**: Development environment:
+   - Service initialization
+   - Database setup
+   - Migration handling
+   - Log monitoring
 
-# View logs
-docker-compose logs -f app
-```
+2. **Debug Configuration**: Development tools:
+   - Hot reloading
+   - Debug logging
+   - Error tracking
+   - Performance monitoring
 
-### 2. Production
-```bash
-# Build and start services
-docker-compose -f docker-compose.prod.yml up -d
+### Production
+Production deployment configuration:
 
-# Scale services
-docker-compose -f docker-compose.prod.yml up -d --scale app=3
-```
+1. **Service Scaling**: Production optimization:
+   - Service replication
+   - Load balancing
+   - Resource allocation
+   - Health monitoring
 
-## Health Checks
+2. **Resource Limits**: Resource management:
+   - CPU limits
+   - Memory limits
+   - Storage limits
+   - Network limits
 
-### 1. Application Health
-```yaml
-services:
-  app:
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-```
+## Health Monitoring
 
-### 2. Database Health
-```yaml
-services:
-  db:
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d ai_support"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-```
+### Application Health
+Application health check implementation:
 
-## Monitoring
+1. **Endpoint Checks**: Health verification:
+   - API availability
+   - Service status
+   - Dependency checks
+   - Performance metrics
 
-### 1. Prometheus Configuration
-```yaml
-# prometheus.yml
-global:
-  scrape_interval: 15s
+2. **Response Validation**: Health validation:
+   - Response time
+   - Error rates
+   - Resource usage
+   - Service state
 
-scrape_configs:
-  - job_name: 'ai_support'
-    static_configs:
-      - targets: ['app:8000']
-```
+### Database Health
+Database health monitoring:
 
-### 2. Grafana Dashboard
-```yaml
-services:
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    depends_on:
-      - prometheus
+1. **Connection Verification**: Database checks:
+   - Connection status
+   - Query performance
+   - Resource usage
+   - Error tracking
 
-volumes:
-  grafana_data:
-```
+2. **Performance Monitoring**: Database metrics:
+   - Query times
+   - Connection pool
+   - Cache usage
+   - Resource utilization
 
 ## Best Practices
 
-1. **Security**
-   - Use secrets for sensitive data
-   - Implement health checks
-   - Use non-root users
+### Security
+Security implementation guidelines:
 
-2. **Performance**
-   - Use multi-stage builds
-   - Optimize layer caching
-   - Configure resource limits
+1. **Secret Management**: Security practices:
+   - Environment variables
+   - Secret rotation
+   - Access control
+   - Network security
 
-3. **Maintenance**
-   - Regular base image updates
-   - Clean up unused resources
-   - Monitor container health
+2. **Build Security**: Container security:
+   - Base image updates
+   - Dependency scanning
+   - Security patches
+   - Access restrictions
 
-4. **Development**
-   - Use volume mounts for code
-   - Enable hot reloading
-   - Configure debugging 
+### Performance
+Performance optimization guidelines:
+
+1. **Build Optimization**: Container optimization:
+   - Layer caching
+   - Multi-stage builds
+   - Resource limits
+   - Network optimization
+
+2. **Resource Management**: Resource optimization:
+   - Memory limits
+   - CPU allocation
+   - Storage management
+   - Network bandwidth
+
+### Maintenance
+Maintenance procedures:
+
+1. **Update Process**: System updates:
+   - Image updates
+   - Dependency updates
+   - Security patches
+   - Configuration updates
+
+2. **Backup Procedures**: Data protection:
+   - Database backups
+   - Configuration backups
+   - Log retention
+   - Recovery procedures 

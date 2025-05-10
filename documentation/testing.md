@@ -1,194 +1,191 @@
-# Testing Documentation
+# Testing Guide
 
 ## Overview
-The AI Support System uses pytest as its testing framework, with a focus on unit testing, integration testing, and mocking external dependencies. The testing strategy follows the Arrange-Act-Assert pattern and emphasizes test isolation and maintainability.
+The AI Support System implements a comprehensive testing strategy using pytest as the primary testing framework. The testing architecture is designed to ensure reliability, maintainability, and proper functionality across all system components.
 
-## Test Structure
+## Test Organization
 
-### 1. Unit Tests
-Located in `tests/unit/`, these tests focus on individual components:
-- Repository implementations
-- Manager logic
-- Utility functions
+### Unit Tests
+The unit testing implementation focuses on testing individual components in isolation:
 
-### 2. Integration Tests
-Located in `tests/integration/`, these tests verify:
-- Database interactions
-- API endpoints
-- Component integration
+1. **Service Layer Tests**: Tests for business logic implementation:
+   - AI service response generation
+   - Vector search functionality
+   - Recommendation generation
+   - Cache management
 
-### 3. Mock Tests
-Located in `tests/mocks/`, these tests:
-- Mock external services (OpenAI)
-- Simulate database responses
-- Test error scenarios
+2. **Repository Layer Tests**: Tests for data access layer:
+   - Database operations
+   - Query execution
+   - Transaction handling
+   - Error scenarios
 
-## Test Categories
+3. **Utility Tests**: Tests for helper functions and utilities:
+   - Input validation
+   - Data transformation
+   - Error handling
+   - Formatting functions
 
-### Repository Tests
-```python
-# Example: AI Support Repository Test
-async def test_get_user_query_history():
-    # Arrange
-    repository = AISupportRepository()
-    user_id = 1
-    
-    # Act
-    history = await repository.get_user_query_history(user_id)
-    
-    # Assert
-    assert isinstance(history, UserQueryHistory)
-    assert len(history.queries) > 0
-```
+### Integration Tests
+Integration testing focuses on component interaction:
 
-### Manager Tests
-```python
-# Example: AI Support Manager Test
-async def test_get_personal_recommendation():
-    # Arrange
-    manager = AISupportManager()
-    user_id = 1
-    
-    # Act
-    recommendations = await manager.get_personal_recommendation(user_id)
-    
-    # Assert
-    assert isinstance(recommendations, RecommendationResponse)
-    assert len(recommendations.recommendations) > 0
-```
+1. **API Integration Tests**: Tests for API endpoints:
+   - Request handling
+   - Response formatting
+   - Error responses
+   - Authentication flow
 
-### API Tests
-```python
-# Example: Router Test
-async def test_get_personal_recommendations_endpoint():
-    # Arrange
-    client = TestClient(app)
-    request_data = {"query": "test", "user_id": 1}
-    
-    # Act
-    response = client.post("/recommendations", json=request_data)
-    
-    # Assert
-    assert response.status_code == 200
-    assert "recommendations" in response.json()
-```
+2. **Service Integration Tests**: Tests for service interactions:
+   - AI service with database
+   - Cache integration
+   - External API calls
+   - Event handling
 
-## Mocking Strategy
+3. **Database Integration Tests**: Tests for database operations:
+   - Connection management
+   - Transaction handling
+   - Migration testing
+   - Data consistency
 
-### 1. Database Mocks
-```python
-@pytest.fixture
-def mock_db_connection():
-    return AsyncMock()
-```
+### Mock Tests
+Mock testing implementation for external dependencies:
 
-### 2. OpenAI Mocks
-```python
-@pytest.fixture
-def mock_openai_client():
-    client = AsyncMock()
-    client.embeddings.create.return_value = {
-        "data": [{"embedding": [0.1, 0.2, 0.3]}]
-    }
-    return client
-```
+1. **External Service Mocks**: Mock implementations for:
+   - OpenAI API calls
+   - Redis operations
+   - Database connections
+   - Third-party services
 
-### 3. Repository Mocks
-```python
-@pytest.fixture
-def mock_ai_support_repository():
-    repository = AsyncMock()
-    repository.get_user_query_history.return_value = UserQueryHistory(
-        queries=["test query"]
-    )
-    return repository
-```
+2. **Event Mocks**: Mock implementations for:
+   - Message queues
+   - Event handlers
+   - Background tasks
+   - Scheduled jobs
 
 ## Test Configuration
 
-### 1. Environment Setup
-```python
-# conftest.py
-@pytest.fixture(autouse=True)
-def setup_test_env():
-    os.environ["OPENAI_API_KEY"] = "test-key"
-    os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/test"
-```
+### Environment Setup
+The test environment configuration includes:
 
-### 2. Database Setup
-```python
-@pytest.fixture
-async def test_db():
-    # Create test database
-    async with AsyncClient() as client:
-        await client.execute("CREATE DATABASE test_db")
-    yield
-    # Cleanup
-    async with AsyncClient() as client:
-        await client.execute("DROP DATABASE test_db")
-```
+1. **Test Database**: Configuration for testing:
+   - Separate test database
+   - Test data fixtures
+   - Migration handling
+   - Cleanup procedures
 
-## Running Tests
+2. **Mock Services**: Configuration for mocks:
+   - Service endpoints
+   - Response patterns
+   - Error scenarios
+   - Performance simulation
 
-### Command Line
-```bash
-# Run all tests
-pytest
+### Test Utilities
+Utility functions and helpers for testing:
 
-# Run specific test file
-pytest tests/unit/test_ai_support_manager.py
+1. **Test Fixtures**: Reusable test components:
+   - Database connections
+   - Service instances
+   - Mock objects
+   - Test data
 
-# Run with coverage
-pytest --cov=src tests/
-```
+2. **Assertion Helpers**: Custom assertion functions:
+   - Response validation
+   - Error checking
+   - Data comparison
+   - State verification
 
-### Test Categories
-```bash
-# Run unit tests only
-pytest tests/unit/
+## Test Execution
 
-# Run integration tests only
-pytest tests/integration/
+### Running Tests
+The test execution process includes:
 
-# Run mock tests only
-pytest tests/mocks/
-```
+1. **Test Discovery**: Automatic test discovery:
+   - Test file location
+   - Test case identification
+   - Test suite organization
+   - Test categorization
+
+2. **Test Execution**: Test running process:
+   - Parallel execution
+   - Test isolation
+   - Resource management
+   - Result collection
+
+### Test Reporting
+The test reporting system includes:
+
+1. **Result Analysis**: Test result processing:
+   - Pass/fail status
+   - Error details
+   - Performance metrics
+   - Coverage data
+
+2. **Report Generation**: Test report creation:
+   - HTML reports
+   - Coverage reports
+   - Performance reports
+   - Error summaries
 
 ## Best Practices
 
-1. **Test Isolation**
-   - Each test should be independent
-   - Use fixtures for setup and teardown
-   - Clean up resources after tests
+### Test Design
+Guidelines for test implementation:
 
-2. **Naming Conventions**
-   - Test files: `test_*.py`
-   - Test functions: `test_*`
-   - Clear, descriptive names
+1. **Test Structure**: Organization principles:
+   - Clear test names
+   - Logical grouping
+   - Proper setup/teardown
+   - Resource cleanup
 
-3. **Assertions**
-   - Use specific assertions
-   - Test both success and failure cases
-   - Verify edge cases
+2. **Test Coverage**: Coverage requirements:
+   - Critical path coverage
+   - Edge case testing
+   - Error scenario testing
+   - Performance testing
 
-4. **Code Coverage**
-   - Aim for high coverage
-   - Focus on critical paths
-   - Document uncovered code
+### Test Maintenance
+Guidelines for test maintenance:
 
-## Common Issues and Solutions
+1. **Code Quality**: Test code standards:
+   - Consistent style
+   - Clear documentation
+   - Proper error handling
+   - Resource management
 
-1. **Async Testing**
-   - Use `pytest-asyncio`
-   - Properly handle async fixtures
-   - Use `async def` for test functions
+2. **Test Updates**: Maintenance procedures:
+   - Regular review
+   - Dependency updates
+   - Test data updates
+   - Performance optimization
 
-2. **Database Testing**
-   - Use test database
-   - Clean up after tests
-   - Mock when appropriate
+## Implementation Guidelines
 
-3. **External Services**
-   - Mock API calls
-   - Simulate responses
-   - Test error handling 
+### Async Testing
+Guidelines for testing async code:
+
+1. **Async Test Structure**: Implementation patterns:
+   - Async test functions
+   - Event loop management
+   - Timeout handling
+   - Resource cleanup
+
+2. **Async Assertions**: Testing async behavior:
+   - Response timing
+   - Concurrent operations
+   - Error handling
+   - State verification
+
+### Database Testing
+Guidelines for database testing:
+
+1. **Test Database Setup**: Configuration:
+   - Database creation
+   - Schema setup
+   - Test data loading
+   - Cleanup procedures
+
+2. **Transaction Management**: Test transactions:
+   - Transaction isolation
+   - Rollback handling
+   - State verification
+   - Resource cleanup 

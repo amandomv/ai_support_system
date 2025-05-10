@@ -2,62 +2,53 @@
 
 ## Prerequisites
 
-### 1. System Requirements
-- Python 3.11 or higher
-- PostgreSQL 15 or higher
-- Docker and Docker Compose
-- Git
+### System Requirements
+- Python 3.11 or higher for modern features
+- PostgreSQL 15+ for vector support
+- Docker and Docker Compose for containerization
+- Git for version control
 
-### 2. Required Extensions
-- pgvector extension for PostgreSQL
-- Redis (for caching)
-- OpenSSL (for security)
+### Required Extensions
+- pgvector for vector similarity search
+- Redis for caching and performance
+- OpenSSL for secure communications
 
 ## Installation Process
 
-### 1. Clone Repository
+### 1. Clone and Setup
 ```bash
+# Clone repository
 git clone https://github.com/your-repo/ai_support_system.git
 cd ai_support_system
-```
 
-### 2. Environment Setup
-```bash
-# Create virtual environment
+# Set up Python environment
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Database Setup
+### 2. Database Setup
 ```bash
-# Create .env file
+# Configure environment
 cp .env.example .env
-
-# Edit .env with your configuration
-nano .env
+nano .env  # Edit with your settings
 
 # Initialize database
 python src/scripts/init_db.py
-
-# Run migrations
 alembic upgrade head
 ```
 
-### 4. Docker Setup
+### 3. Docker Setup
 ```bash
-# Build and start services
+# Start services
 docker-compose up -d
-
-# Verify services are running
-docker-compose ps
+docker-compose ps  # Verify services
 ```
 
 ## Configuration
 
-### 1. Environment Variables
+### Environment Variables
+Essential settings in `.env`:
 ```env
 # Database
 POSTGRES_USER=your_user
@@ -78,125 +69,92 @@ HOST=0.0.0.0
 DEBUG=false
 ```
 
-### 2. Database Configuration
-```python
-# src/config/database.py
-DATABASE_CONFIG = {
-    'min_connections': 5,
-    'max_connections': 20,
-    'command_timeout': 60,
-    'statement_cache_size': 100
-}
-```
+### Database Configuration
+Key settings for optimal performance:
+- Connection pooling (5-20 connections)
+- Command timeout (60 seconds)
+- Statement cache (100 statements)
+- Vector search optimization
 
-### 3. API Configuration
-```python
-# src/config/api.py
-API_CONFIG = {
-    'rate_limit': '100/minute',
-    'timeout': 30,
-    'max_retries': 3
-}
-```
+### API Configuration
+Important API settings:
+- Rate limiting (100 requests/minute)
+- Request timeout (30 seconds)
+- Retry mechanism (3 attempts)
+- CORS configuration
 
-## Verification Steps
+## Verification
 
-### 1. Database Verification
-```bash
-# Check database connection
-python src/scripts/verify_db.py
+### Database Verification
+- Check database connectivity
+- Verify pgvector extension
+- Test vector operations
+- Validate indexes
 
-# Check pgvector extension
-psql -U your_user -d ai_support -c "SELECT * FROM pg_extension WHERE extname = 'vector';"
-```
+### API Verification
+- Test health endpoint
+- Verify API documentation
+- Check authentication
+- Test rate limiting
 
-### 2. API Verification
-```bash
-# Test API endpoints
-curl http://localhost:8000/health
-curl http://localhost:8000/docs
-```
-
-### 3. Embedding Service Verification
-```bash
-# Test embedding generation
-python src/scripts/test_embeddings.py
-```
+### Embedding Service
+- Test embedding generation
+- Verify vector storage
+- Check similarity search
+- Validate caching
 
 ## Troubleshooting
 
-### 1. Common Issues
-- Database connection errors
+### Common Issues
+- Database connection problems
 - Missing extensions
-- Environment variable issues
+- Environment configuration
 - Port conflicts
 
-### 2. Solutions
-```bash
-# Reset database
-python src/scripts/reset_db.py
+### Solutions
+- Reset database if needed
+- Check service logs
+- Verify environment
+- Test connectivity
 
-# Check logs
-docker-compose logs -f
+## Security
 
-# Verify environment
-python src/scripts/verify_env.py
-```
+### SSL Setup
+- Generate certificates
+- Configure HTTPS
+- Set up secure headers
+- Enable CORS
 
-## Security Setup
+### API Security
+- Generate API keys
+- Configure authentication
+- Set up rate limiting
+- Enable logging
 
-### 1. SSL Configuration
-```bash
-# Generate SSL certificates
-openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365
-```
+## Monitoring
 
-### 2. API Key Setup
-```bash
-# Generate API key
-python src/scripts/generate_api_key.py
+### Prometheus Setup
+- Configure metrics collection
+- Set up scraping
+- Define alert rules
+- Monitor performance
 
-# Configure API key in .env
-echo "API_KEY=$(python src/scripts/generate_api_key.py)" >> .env
-```
-
-## Monitoring Setup
-
-### 1. Prometheus Configuration
-```yaml
-# prometheus.yml
-global:
-  scrape_interval: 15s
-
-scrape_configs:
-  - job_name: 'ai_support'
-    static_configs:
-      - targets: ['localhost:8000']
-```
-
-### 2. Grafana Setup
-```bash
-# Start Grafana
-docker-compose up -d grafana
-
-# Access Grafana
-open http://localhost:3000
-```
+### Grafana Setup
+- Configure dashboards
+- Set up alerts
+- Monitor metrics
+- Track performance
 
 ## Backup and Recovery
 
-### 1. Database Backup
-```bash
-# Create backup
-pg_dump -U your_user -d ai_support > backup.sql
+### Database Backup
+- Schedule daily backups
+- Store securely
+- Test restoration
+- Monitor space
 
-# Schedule regular backups
-crontab -e
-# Add: 0 0 * * * pg_dump -U your_user -d ai_support > /backups/backup_$(date +\%Y\%m\%d).sql
-```
-
-### 2. Recovery Process
-```bash
-# Restore from backup
-psql -U your_user -d ai_support < backup.sql
-``` 
+### Recovery Process
+- Verify backup integrity
+- Test recovery procedure
+- Document process
+- Regular testing 

@@ -1,372 +1,218 @@
-# Endpoints and Setup Documentation
+# Endpoints and Setup Guide
+
+## Overview
+The AI Support System implements a comprehensive set of API endpoints and configuration settings. This guide details the endpoint implementations, database setup, and Docker environment configuration.
 
 ## API Endpoints
 
-### 1. AI Support Response
-```python
-@router.post("/ai_faq_search", response_model=SupportResponse)
-async def get_ai_support_response(
-    request: QueryRequest,
-    ai_support_manager: AISupportManager = Depends(get_ai_support_manager_dependency)
-) -> SupportResponse:
-    """
-    Generate AI-powered support response based on user query.
-    
-    Args:
-        request: QueryRequest containing user query and ID
-        ai_support_manager: Injected AISupportManager instance
-    
-    Returns:
-        SupportResponse containing AI-generated response and relevant documents
-    """
-    return await ai_support_manager.get_ai_support_response(request.query, request.user_id)
-```
+### AI Support Response
+The AI support endpoint implementation:
 
-### 2. Personal Recommendations
-```python
-@router.post("/recommendations", response_model=RecommendationResponse)
-async def get_personal_recommendations(
-    request: QueryRequest,
-    ai_support_manager: AISupportManager = Depends(get_ai_support_manager_dependency)
-) -> RecommendationResponse:
-    """
-    Generate personalized recommendations based on user history.
-    
-    Args:
-        request: QueryRequest containing user query and ID
-        ai_support_manager: Injected AISupportManager instance
-    
-    Returns:
-        RecommendationResponse containing personalized recommendations
-    """
-    return await ai_support_manager.get_personal_recommendation(request.user_id)
-```
+1. **Endpoint Configuration**: Core setup:
+   - Path: `/ai_faq_search`
+   - Method: POST
+   - Authentication: API key
+   - Rate limit: 5 requests/minute
+   - Response format: JSON
 
-## Database Setup
+2. **Request Processing**: Processing flow:
+   - Input validation
+   - Query preprocessing
+   - Vector search
+   - AI response generation
+   - Response formatting
 
-### 1. PostgreSQL with pgvector
-```sql
--- Enable vector extension
-CREATE EXTENSION IF NOT EXISTS vector;
+### Personal Recommendations
+The recommendations endpoint implementation:
 
--- Create FAQ documents table
-CREATE TABLE faq_documents (
-    id SERIAL PRIMARY KEY,
-    content TEXT NOT NULL,
-    embedding vector(1536),
-    category faq_category,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+1. **Endpoint Configuration**: Core setup:
+   - Path: `/recommendations`
+   - Method: POST
+   - Authentication: JWT
+   - Rate limit: 10 requests/minute
+   - Response format: JSON
 
--- Create user responses table
-CREATE TABLE user_responses (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    query TEXT NOT NULL,
-    response TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+2. **Recommendation Process**: Processing flow:
+   - User authentication
+   - History analysis
+   - Content filtering
+   - Recommendation generation
+   - Response formatting
 
--- Create index for vector similarity search
-CREATE INDEX faq_documents_embedding_idx ON faq_documents 
-USING ivfflat (embedding vector_cosine_ops)
-WITH (lists = 100);
-```
+## Database Configuration
 
-### 2. AsyncPG Connection Pool
-```python
-from asyncpg import create_pool
+### PostgreSQL Setup
+The database configuration implementation:
 
-async def get_database_connection():
-    """
-    Create and return a database connection pool.
-    
-    Returns:
-        Pool: AsyncPG connection pool
-    """
-    return await create_pool(
-        dsn=os.getenv("DATABASE_URL"),
-        min_size=5,
-        max_size=20,
-        command_timeout=60,
-        statement_cache_size=100
-    )
-```
+1. **Database Initialization**: Setup process:
+   - Extension installation
+   - Schema creation
+   - Index setup
+   - User configuration
+   - Permission setup
 
-### 3. Database Migrations
-```python
-# alembic/env.py
-from alembic import context
-from sqlalchemy import engine_from_config, pool
-from logging.config import fileConfig
+2. **Connection Management**: Connection handling:
+   - Pool configuration
+   - Connection limits
+   - Timeout settings
+   - Error handling
+   - Health checks
 
-config = context.config
-fileConfig(config.config_file_name)
+### Migration System
+The database migration implementation:
 
-target_metadata = Base.metadata
+1. **Migration Configuration**: Setup process:
+   - Alembic configuration
+   - Version tracking
+   - Migration scripts
+   - Rollback support
+   - Environment handling
 
-def run_migrations_online():
-    """Run migrations in 'online' mode."""
-    configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = os.getenv("DATABASE_URL")
-    
-    connectable = engine_from_config(
-        configuration,
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+2. **Migration Execution**: Migration process:
+   - Version detection
+   - Change application
+   - State verification
+   - Error recovery
+   - Logging setup
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata
-        )
+## Docker Environment
 
-        with context.begin_transaction():
-            context.run_migrations()
-```
+### Container Setup
+The container configuration implementation:
 
-## Docker Setup
+1. **Base Image**: Image configuration:
+   - Python 3.11 slim
+   - System dependencies
+   - Build tools
+   - Security updates
+   - Optimization settings
 
-### 1. Dockerfile
-```dockerfile
-# Base image
-FROM python:3.11-slim
+2. **Service Configuration**: Service setup:
+   - Port mapping
+   - Volume mounts
+   - Environment variables
+   - Resource limits
+   - Health checks
 
-# Set working directory
-WORKDIR /app
+### Service Configuration
+The service setup implementation:
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+1. **Application Service**: Main service:
+   - FastAPI application
+   - Worker configuration
+   - Logging setup
+   - Monitoring setup
+   - Security configuration
 
-# Copy requirements first for better caching
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+2. **Database Service**: Database setup:
+   - PostgreSQL configuration
+   - Volume management
+   - Backup setup
+   - Performance tuning
+   - Monitoring configuration
 
-# Copy application code
-COPY . .
+## Best Practices
 
-# Set environment variables
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
+### Database Operations
+Database operation guidelines:
 
-# Run migrations and start application
-CMD ["sh", "-c", "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000"]
-```
+1. **Connection Management**: Connection handling:
+   - Pool configuration
+   - Transaction management
+   - Error handling
+   - Resource cleanup
+   - Performance optimization
 
-### 2. Docker Compose
-```yaml
-version: '3.8'
+2. **Query Optimization**: Query handling:
+   - Index usage
+   - Query planning
+   - Cache utilization
+   - Resource management
+   - Performance monitoring
 
-services:
-  app:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/ai_support
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    depends_on:
-      - db
-      - prometheus
+### API Development
+API development guidelines:
 
-  db:
-    image: ankane/pgvector:latest
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=ai_support
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+1. **Input Handling**: Input processing:
+   - Validation rules
+   - Data sanitization
+   - Error handling
+   - Performance optimization
+   - Security measures
 
-  prometheus:
-    image: prom/prometheus:latest
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
+2. **Response Management**: Response handling:
+   - Format standardization
+   - Error formatting
+   - Performance optimization
+   - Security measures
+   - Documentation
 
-volumes:
-  postgres_data:
-```
+### Container Management
+Container management guidelines:
 
-## AsyncPG Best Practices
+1. **Image Management**: Image handling:
+   - Build optimization
+   - Layer management
+   - Security updates
+   - Resource limits
+   - Performance tuning
 
-### 1. Connection Pooling
-```python
-class DatabaseManager:
-    def __init__(self):
-        self.pool = None
+2. **Service Management**: Service handling:
+   - Health monitoring
+   - Resource management
+   - Logging setup
+   - Security configuration
+   - Performance optimization
 
-    async def initialize(self):
-        """Initialize the connection pool."""
-        self.pool = await create_pool(
-            dsn=os.getenv("DATABASE_URL"),
-            min_size=5,
-            max_size=20,
-            command_timeout=60
-        )
+## Implementation Guidelines
 
-    async def get_connection(self):
-        """Get a connection from the pool."""
-        return await self.pool.acquire()
+### Database Access
+Database access guidelines:
 
-    async def release_connection(self, connection):
-        """Release a connection back to the pool."""
-        await self.pool.release(connection)
-```
+1. **Access Patterns**: Access implementation:
+   - Connection pooling
+   - Transaction management
+   - Error handling
+   - Resource cleanup
+   - Performance optimization
 
-### 2. Transaction Management
-```python
-async def execute_transaction(self, query: str, params: dict):
-    """
-    Execute a query within a transaction.
-    
-    Args:
-        query: SQL query to execute
-        params: Query parameters
-    
-    Returns:
-        Query result
-    """
-    async with self.pool.acquire() as connection:
-        async with connection.transaction():
-            return await connection.fetch(query, **params)
-```
+2. **Query Patterns**: Query implementation:
+   - Index usage
+   - Query optimization
+   - Cache utilization
+   - Resource management
+   - Performance monitoring
 
-### 3. Error Handling
-```python
-async def safe_execute(self, query: str, params: dict):
-    """
-    Execute a query with proper error handling.
-    
-    Args:
-        query: SQL query to execute
-        params: Query parameters
-    
-    Returns:
-        Query result
-    
-    Raises:
-        DatabaseError: If query execution fails
-    """
-    try:
-        return await self.execute_transaction(query, params)
-    except asyncpg.PostgresError as e:
-        logger.error(f"Database error: {str(e)}")
-        raise DatabaseError(f"Failed to execute query: {str(e)}")
-```
+### API Security
+API security guidelines:
 
-## Performance Optimization
+1. **Authentication**: Security implementation:
+   - API key validation
+   - JWT handling
+   - Rate limiting
+   - Access control
+   - Security monitoring
 
-### 1. Connection Pool Settings
-```python
-POOL_SETTINGS = {
-    'min_size': 5,  # Minimum connections
-    'max_size': 20,  # Maximum connections
-    'command_timeout': 60,  # Query timeout
-    'statement_cache_size': 100,  # Prepared statement cache
-    'max_cached_statement_lifetime': 300  # Cache lifetime in seconds
-}
-```
+2. **Data Protection**: Data security:
+   - Input validation
+   - Output encoding
+   - Data encryption
+   - Access control
+   - Security monitoring
 
-### 2. Query Optimization
-```python
-# Use prepared statements
-async def get_user_history(self, user_id: int):
-    query = """
-    SELECT query, created_at 
-    FROM user_responses 
-    WHERE user_id = $1 
-    ORDER BY created_at DESC 
-    LIMIT 10
-    """
-    return await self.pool.fetch(query, user_id)
+### Performance Optimization
+Performance optimization guidelines:
 
-# Use batch operations
-async def save_user_responses(self, responses: List[UserResponse]):
-    query = """
-    INSERT INTO user_responses (user_id, query, response)
-    SELECT * FROM unnest($1::int[], $2::text[], $3::text[])
-    """
-    user_ids = [r.user_id for r in responses]
-    queries = [r.query for r in responses]
-    response_texts = [r.response for r in responses]
-    await self.pool.execute(query, user_ids, queries, response_texts)
-```
+1. **Response Time**: Performance implementation:
+   - Query optimization
+   - Cache utilization
+   - Resource management
+   - Load balancing
+   - Monitoring setup
 
-### 3. Vector Search Optimization
-```python
-# Create efficient index
-CREATE INDEX faq_documents_embedding_idx ON faq_documents 
-USING ivfflat (embedding vector_cosine_ops)
-WITH (lists = 100);
-
-# Optimize similarity search
-async def find_similar_documents(self, embedding: List[float], limit: int = 5):
-    query = """
-    SELECT content, category, 
-           1 - (embedding <=> $1) as similarity
-    FROM faq_documents
-    WHERE 1 - (embedding <=> $1) > 0.7
-    ORDER BY similarity DESC
-    LIMIT $2
-    """
-    return await self.pool.fetch(query, embedding, limit)
-```
-
-## Monitoring and Logging
-
-### 1. Database Metrics
-```python
-# Track query performance
-QUERY_TIME = Histogram(
-    'database_query_time_seconds',
-    'Time taken to execute database queries',
-    ['query_type']
-)
-
-@metrics.track_time(QUERY_TIME, {'query_type': 'user_history'})
-async def get_user_history(self, user_id: int):
-    # Implementation
-    pass
-```
-
-### 2. Connection Pool Metrics
-```python
-# Track pool usage
-POOL_SIZE = Gauge(
-    'database_pool_size',
-    'Current size of the database connection pool'
-)
-
-POOL_AVAILABLE = Gauge(
-    'database_pool_available',
-    'Number of available connections in the pool'
-)
-
-async def update_pool_metrics(self):
-    """Update connection pool metrics."""
-    POOL_SIZE.set(self.pool.get_size())
-    POOL_AVAILABLE.set(self.pool.get_active_size())
-```
-
-### 3. Error Tracking
-```python
-# Track database errors
-DB_ERRORS = Counter(
-    'database_errors_total',
-    'Total number of database errors',
-    ['error_type']
-)
-
-async def safe_execute(self, query: str, params: dict):
-    try:
-        return await self.execute_transaction(query, params)
-    except asyncpg.PostgresError as e:
-        DB_ERRORS.labels(error_type=type(e).__name__).inc()
-        raise
-``` 
+2. **Resource Usage**: Resource optimization:
+   - Memory management
+   - CPU utilization
+   - Storage optimization
+   - Network efficiency
+   - Cache strategy 
