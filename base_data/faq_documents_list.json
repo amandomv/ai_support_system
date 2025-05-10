@@ -59,6 +59,36 @@
       "link": "/faq/success-tips",
       "text_path": "base_data/faq_documents/10_success_tips.md",
       "category": "best_practices"
+    },
+    {
+      "title": "Freelancer Profile Types",
+      "link": "/faq/freelancer-profiles",
+      "text_path": "base_data/faq_documents/11_freelancer_profiles.md",
+      "category": "freelancers"
+    },
+    {
+      "title": "Project Workflows",
+      "link": "/faq/project-workflows",
+      "text_path": "base_data/faq_documents/12_project_workflows.md",
+      "category": "platform_features"
+    },
+    {
+      "title": "Industry-Specific Guides",
+      "link": "/faq/industry-guides",
+      "text_path": "base_data/faq_documents/13_industry_guides.md",
+      "category": "platform_features"
+    },
+    {
+      "title": "Success Stories",
+      "link": "/faq/success-stories",
+      "text_path": "base_data/faq_documents/14_success_stories.md",
+      "category": "platform_features"
+    },
+    {
+      "title": "Technical Tutorials",
+      "link": "/faq/technical-tutorials",
+      "text_path": "base_data/faq_documents/15_technical_tutorials.md",
+      "category": "platform_features"
     }
   ]
 }
