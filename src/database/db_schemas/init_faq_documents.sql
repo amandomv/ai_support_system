@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS platform_information.faq_documents (
     title VARCHAR(255) NOT NULL,
     link VARCHAR(512) NOT NULL,
     text TEXT NOT NULL,
+    llm_summary TEXT,
     category platform_information.faq_category NOT NULL,
     embedding vector(1536),  -- OpenAI embeddings are 1536 dimensions
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -44,8 +45,9 @@ COMMENT ON COLUMN platform_information.faq_documents.id IS 'Unique identifier fo
 COMMENT ON COLUMN platform_information.faq_documents.title IS 'Title of the FAQ document';
 COMMENT ON COLUMN platform_information.faq_documents.link IS 'URL or reference link to the original document';
 COMMENT ON COLUMN platform_information.faq_documents.text IS 'Full text content of the FAQ document';
+COMMENT ON COLUMN platform_information.faq_documents.llm_summary IS 'AI-generated summary of the document content';
 COMMENT ON COLUMN platform_information.faq_documents.category IS 'Category of the FAQ document';
-COMMENT ON COLUMN platform_information.faq_documents.embedding IS 'Vector embedding of the document text for semantic search';
+COMMENT ON COLUMN platform_information.faq_documents.embedding IS 'Vector embedding for semantic search';
 COMMENT ON COLUMN platform_information.faq_documents.created_at IS 'Timestamp when the document was created';
 COMMENT ON COLUMN platform_information.faq_documents.updated_at IS 'Timestamp when the document was last updated';
 

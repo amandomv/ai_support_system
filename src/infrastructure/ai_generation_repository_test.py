@@ -36,6 +36,7 @@ def sample_faq_documents() -> list[FaqDocument]:
             title="Test Document 1",
             link="http://test1.com",
             text="This is test document 1",
+            llm_summary="Summary of test document 1",
             category=FaqCategory.PLATFORM_OVERVIEW,
             embedding=[0.1, 0.2, 0.3],
         ),
@@ -44,6 +45,7 @@ def sample_faq_documents() -> list[FaqDocument]:
             title="Test Document 2",
             link="http://test2.com",
             text="This is test document 2",
+            llm_summary="Summary of test document 2",
             category=FaqCategory.PLATFORM_OVERVIEW,
             embedding=[0.4, 0.5, 0.6],
         ),
@@ -128,15 +130,20 @@ def test_create_prompt_template() -> None:
     assert len(template.messages) == 2
     assert (
         template.messages[0].prompt.template
-        == """You are a technical support assistant for the Shakers platform.
+        == """You are a support assistant for the Shakers platform.
                 Your task is to answer user questions using ONLY the provided context.
                 If the answer is not in the context, say you don't have that information.
 
-                Format your response as follows:
-                - Start with a clear, concise answer
-                - If relevant, provide additional context or examples
-                - Keep the tone professional but friendly
-                - Do not mention that you are an AI or that you are using context
+                Provide detailed responses that:
+                1. Start with a clear, direct answer
+                2. Include specific examples and use cases
+                3. Explain technical terms and concepts
+                4. Add relevant tips and best practices
+                5. Use bullet points for lists and steps
+                6. Use code blocks for technical content
+
+                Keep the tone professional but friendly. Do not mention you are an AI.
+                Be thorough and detailed in your explanations.
 
                 {format_instructions}"""
     )
@@ -157,8 +164,8 @@ def test_prepare_context(sample_faq_documents: list[FaqDocument]) -> None:
     # Assert
     assert "Test Document 1" in context
     assert "Test Document 2" in context
-    assert "This is test document 1" in context
-    assert "This is test document 2" in context
+    assert "Summary of test document 1" in context
+    assert "Summary of test document 2" in context
 
 
 def test_get_used_documents(sample_faq_documents: list[FaqDocument]) -> None:

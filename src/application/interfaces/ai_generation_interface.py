@@ -15,6 +15,22 @@ class AIGenerationInterface(ABC):
     """
 
     @abstractmethod
+    async def generate_summary(self, text: str) -> str:
+        """
+        Generate a concise summary of the given text using OpenAI's API.
+
+        Args:
+            text: The text to summarize
+
+        Returns:
+            str: A concise summary of the input text
+
+        Raises:
+            Exception: If there's an error during the summary generation process
+        """
+        ...
+
+    @abstractmethod
     async def generate_embeddings(self, text: str) -> EmbeddingResponse:
         """
         Generate embeddings for the given text using OpenAI's API.

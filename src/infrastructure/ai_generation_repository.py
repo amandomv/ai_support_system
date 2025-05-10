@@ -31,6 +31,48 @@ class AIGenerationRepository(AIGenerationInterface):
         self.chat_model = "gpt-4"
         self.client = client
 
+    async def generate_summary(self, text: str) -> str:
+        """
+        Generate a concise summary of the given text using OpenAI's API.
+
+        Args:
+            text: The text to summarize
+
+        Returns:
+            str: A concise summary of the input text
+
+        Raises:
+            Exception: If there's an error during the summary generation process
+        """
+        try:
+            # Create a prompt for summarization
+            prompt = f"""Please provide a concise summary of the following text, focusing on the key points and main ideas. 
+            The summary should be clear and informative while being significantly shorter than the original text.
+
+            Text to summarize:
+            {text}
+
+            Summary:"""
+
+            # Generate the summary using GPT-4
+            response = self.client.chat.completions.create(
+                model=self.chat_model,
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant that creates extensive and informative summaries, it needs to capture all the infomation."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,  # Lower temperature for more focused summaries
+                max_tokens=150,   # Limit summary length
+            )
+
+            summary = response.choices[0].message.content.strip()
+            self.logger.debug(f"Generated summary of length {len(summary)} characters")
+            return summary
+
+        except Exception as e:
+            self.logger.error(f"Error generating summary: {str(e)}")
+            raise
+
     async def generate_embeddings(self, text: str) -> EmbeddingResponse:
         try:
             response = self.client.embeddings.create(
@@ -89,7 +131,7 @@ class AIGenerationRepository(AIGenerationInterface):
     def _prepare_context(context_docs: list[FaqDocument]) -> str:
         """Prepare the context string from the documents."""
         return "\n\n".join(
-            f"Document: {doc.title}\nContent: {doc.text}" for doc in context_docs
+            f"Document: {doc.title}\nContent: {doc.llm_summary}" for doc in context_docs
         )
 
     @staticmethod

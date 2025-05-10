@@ -40,6 +40,7 @@ class FaqDocument(BaseModel):
     title: str = Field(..., description="Title of the FAQ document")
     link: str = Field(..., description="URL or reference link to the original document")
     text: str = Field(..., description="Full text content of the FAQ document")
+    llm_summary: Optional[str] = Field(None, description="AI-generated summary of the document content")
     category: FaqCategory = Field(..., description="Category of the FAQ document")
     embedding: Optional[List[float]] = None
     created_at: Optional[str] = None

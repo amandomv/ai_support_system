@@ -38,9 +38,10 @@ class DumpDataManager:
 
         This function:
         1. Reads FAQ documents from base data
-        2. Generates embeddings for each document
-        3. Creates FaqDocument instances
-        4. Inserts the documents into the database
+        2. Generates a summary for each document
+        3. Generates embeddings for each document's summary
+        4. Creates FaqDocument instances
+        5. Inserts the documents into the database
 
         Args:
             base_data: List of dictionaries containing FAQ document data.
@@ -55,9 +56,12 @@ class DumpDataManager:
             # Process each document and generate embeddings
             faq_documents = []
             for doc in base_data:
-                # Generate embedding for the document text
+                # Generate summary for the document text
+                summary = await self.ai_repository.generate_summary(doc["text"])
+                
+                # Generate embedding for the document summary
                 embedding_response = await self.ai_repository.generate_embeddings(
-                    doc["text"]
+                    summary
                 )
 
                 # Create FaqDocument instance
@@ -66,12 +70,13 @@ class DumpDataManager:
                     title=doc["title"],
                     link=doc["link"],
                     text=doc["text"],
+                    llm_summary=summary,
                     category=FaqCategory(doc["category"]),
                     embedding=embedding_response.embedding.vector,
                 )
                 faq_documents.append(faq_document)
 
-                self.logger.debug(f"Generated embedding for document: {doc['title']}")
+                self.logger.debug(f"Generated summary and embedding for document: {doc['title']}")
 
             # Dump all documents into the database
             await self.dump_data_repository.dump_faq_documents(faq_documents)

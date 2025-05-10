@@ -57,6 +57,7 @@ async def test_dump_data(
 ) -> None:
     """Test dump_data method."""
     # Arrange
+    mock_ai_repository.generate_summary.return_value = "Test summary"
     mock_ai_repository.generate_embeddings.return_value = EmbeddingResponse(
         embedding=Embedding(
             vector=[0.1] * 1536
@@ -69,6 +70,7 @@ async def test_dump_data(
     await dump_data_manager.dump_data(sample_base_data)
 
     # Assert
+    assert mock_ai_repository.generate_summary.call_count == 2
     assert mock_ai_repository.generate_embeddings.call_count == 2
     mock_dump_data_repository.dump_faq_documents.assert_called_once()
 

@@ -42,19 +42,21 @@ class DumpDataRepository(DumpDataInterface):
             # Prepare the insert statement using unnest
             insert_query = """
                 INSERT INTO platform_information.faq_documents
-                (title, link, text, category, embedding, created_at, updated_at)
+                (title, link, text, llm_summary, category, embedding, created_at, updated_at)
                 SELECT
                     unnest($1::text[]) as title,
                     unnest($2::text[]) as link,
                     unnest($3::text[]) as text,
-                    unnest($4::platform_information.faq_category[]) as category,
-                    unnest($5::vector[]) as embedding,
-                    unnest($6::timestamptz[]) as created_at,
-                    unnest($7::timestamptz[]) as updated_at
+                    unnest($4::text[]) as llm_summary,
+                    unnest($5::platform_information.faq_category[]) as category,
+                    unnest($6::vector[]) as embedding,
+                    unnest($7::timestamptz[]) as created_at,
+                    unnest($8::timestamptz[]) as updated_at
                 ON CONFLICT (id) DO UPDATE SET
                     title = EXCLUDED.title,
                     link = EXCLUDED.link,
                     text = EXCLUDED.text,
+                    llm_summary = EXCLUDED.llm_summary,
                     category = EXCLUDED.category,
                     embedding = EXCLUDED.embedding,
                     updated_at = CURRENT_TIMESTAMP
@@ -64,6 +66,7 @@ class DumpDataRepository(DumpDataInterface):
             titles = [doc.title for doc in faq_documents]
             links = [doc.link for doc in faq_documents]
             texts = [doc.text for doc in faq_documents]
+            summaries = [doc.llm_summary for doc in faq_documents]
             categories = [doc.category.value for doc in faq_documents]
             embeddings = [
                 f"[{', '.join(map(str, doc.embedding))}]" for doc in faq_documents
@@ -71,12 +74,13 @@ class DumpDataRepository(DumpDataInterface):
             created_ats = [doc.created_at for doc in faq_documents]
             updated_ats = [doc.updated_at for doc in faq_documents]
 
-            # Execute single batch insert
+            # Execute the batch insert
             await self.conn.execute(
                 insert_query,
                 titles,
                 links,
                 texts,
+                summaries,
                 categories,
                 embeddings,
                 created_ats,
